@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Fast Offers | The Unfair Advantage</title>
+    
+    <!-- Fonts -->
+    <link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@200,300,400,500,700,800&f[]=gambetta@400,500,600,700&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'brand': '#100EA0',
+                        'brand-dark': '#05044a',
+                        'brand-light': '#EBEBFF',
+                        'paper': '#FFFFFF',
+                        'ink': '#050505',
+                        'ink-light': '#444444',
+                        'off-white': '#F4F4F5',
+                    },
+                    fontFamily: {
+                        serif: ['Gambetta', 'serif'],
+                        sans: ['Cabinet Grotesk', 'sans-serif'],
+                    },
+                    backgroundImage: {
+                        'grid-pattern': "url(\"data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23100ea0' fill-opacity='0.03' fill-rule='evenodd'%3E%3Cpath d='M0 40L40 0H20L0 20M40 40V20L20 40'/%3E%3C/g%3E%3C/svg%3E\")",
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        :root { --brand: #100EA0; }
+        body { background-color: #ffffff; color: #050505; cursor: default; overflow-x: hidden; margin: 0; }
+        
+        /* Texture */
+        .noise { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9000; opacity: 0.04; background: url('https://grainy-gradients.vercel.app/noise.svg'); mix-blend-mode: multiply; }
+
+        /* Smooth Scroll */
+        html.lenis, html.lenis body { height: auto; }
+        .lenis.lenis-smooth { scroll-behavior: auto !important; }
+        .lenis.lenis-stopped { overflow: hidden; }
+
+        /* Animations */
+        .highlight-text { background: linear-gradient(120deg, transparent 50%, #EBEBFF 50%); background-size: 250% 100%; background-position: 0% 0%; transition: background-position 0.8s ease-out; }
+        .highlight-text.active { background-position: 100% 0%; }
+        .maglev-card { background: white; transition: transform 0.1s ease-out, box-shadow 0.1s ease-out; transform-style: preserve-3d; perspective: 1000px; will-change: transform; }
+        .scanline { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, transparent 50%, rgba(16, 14, 160, 0.05) 50%); background-size: 100% 4px; pointer-events: none; }
+
+        /* --- NAVIGATION TRANSITIONS --- */
+        nav { width: 100%; top: 0; left: 50%; transform: translateX(-50%); transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1); }
+        .nav-links-container { overflow: hidden; max-width: 600px; opacity: 1; transition: max-width 0.5s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.3s ease; }
+        
+        /* Pill State */
+        nav.scrolled { top: 1rem; border-radius: 9999px; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(16px) saturate(180%); border: 1px solid rgba(200, 200, 200, 0.4); box-shadow: 0 10px 30px -5px rgba(0,0,0,0.08); width: 90%; padding: 0.5rem 0.5rem 0.5rem 1.2rem; justify-content: space-between; }
+        
+        @media (min-width: 768px) {
+            nav.scrolled { width: fit-content; top: 1.5rem; padding-left: 2rem; gap: 4rem; justify-content: center; }
+        }
+        nav.scrolled .nav-links-container { max-width: 0px; opacity: 0; pointer-events: none; display: none; }
+
+        /* Animation Utils */
+        .anim-item { opacity: 0; transform: translateY(10px); transition: all 0.5s ease-out; }
+        .screen-state[style*="opacity: 1"] .anim-item { opacity: 1; transform: translateY(0); }
+        
+        /* Preloader */
+        #preloader { position: fixed; inset: 0; background: #fff; z-index: 10000; display: flex; justify-content: center; align-items: center; }
+        .loader-line { width: 0%; height: 2px; background: #100EA0; transition: width 1s ease-in-out; }
+
+        /* Layouts */
+        .horizontal-wrapper { display: flex; flex-wrap: nowrap; width: fit-content; height: 100%; }
+        .museum-panel { width: 100vw; height: 100svh; flex-shrink: 0; position: relative; }
+        
+        /* Marquee */
+        @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        .animate-marquee { animation: marquee 40s linear infinite; }
+        .mask-fade-sides { mask-image: linear-gradient(to right, transparent, black 20%, black 80%, transparent); -webkit-mask-image: linear-gradient(to right, transparent, black 20%, black 80%, transparent); }
+    </style>
+</head>
+<body class="antialiased selection:bg-brand selection:text-white">
+
+    <div class="noise"></div>
+
+    <!-- PRELOADER -->
+    <div id="preloader">
+        <div class="w-64">
+            <div class="flex justify-between mb-2 font-sans text-xs font-bold tracking-widest uppercase">
+                <span>System Check</span>
+                <span id="loader-pct">0%</span>
+            </div>
+            <div class="w-full bg-gray-100 h-[2px]">
+                <div class="loader-line"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NAVIGATION -->
+    <nav class="fixed z-50 flex justify-between items-center py-6 px-6 md:py-8 md:px-8 border border-transparent transition-all duration-300">
+        <a href="#" class="text-brand whitespace-nowrap">
+            <svg viewBox="0 0 800 150" class="h-6 md:h-8 w-auto" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <g transform="matrix(2.8277243,0,0,2.8277243,-7761.7454,-5281.8881)">
+                    <g transform="matrix(2.6367825,0,0,2.6367825,699.46912,1339.0883)" fill="currentColor">
+                        <text xml:space="preserve" transform="matrix(0.06067336,0,0,0.06067336,803.42442,175.93079)" fill="currentColor"><tspan x="1254.4082" y="703.13993"><tspan>®</tspan></tspan></text>
+                        <path d="m 787.88845,205.89576 v -2.31906 h -10.87191 v 14.89303 h 2.76585 v -5.70191 h 7.19121 v -2.34033 h -7.19121 v -4.53173 z" fill="currentColor"/>
+                        <path d="m 792.71499,206.98082 c -1.82972,0 -3.5956,0.46807 -4.80832,1.4042 l 1.04251,1.93609 c 0.85103,-0.7021 2.17013,-1.12761 3.44667,-1.12761 1.89355,0 2.82968,0.91486 2.82968,2.46799 v 0.1702 h -2.93606 c -3.44667,0 -4.72321,1.4893 -4.72321,3.38285 0,1.97864 1.63823,3.40412 4.23387,3.40412 1.70206,0 2.93606,-0.55317 3.57433,-1.53186 v 1.38293 h 2.51054 v -6.65931 c 0,-3.27647 -1.89354,-4.8296 -5.17001,-4.8296 z m -0.36169,9.70174 c -1.36165,0 -2.17013,-0.61699 -2.17013,-1.5744 0,-0.82976 0.48935,-1.51058 2.29779,-1.51058 h 2.74457 v 1.3191 c -0.44679,1.17016 -1.57441,1.76588 -2.87223,1.76588 z" fill="currentColor"/>
+                        <path d="m 803.60108,218.61866 c 3.19136,0 5.14873,-1.38293 5.14873,-3.5105 0,-4.44663 -7.021,-2.40416 -7.021,-4.70194 0,-0.74466 0.76593,-1.27655 2.38289,-1.27655 1.08506,0 2.17012,0.21276 3.25519,0.85103 l 1.02123,-2.0212 c -1.02123,-0.61699 -2.74457,-0.97868 -4.25515,-0.97868 -3.06371,0 -4.9998,1.4042 -4.9998,3.55305 0,4.53174 7.021,2.48926 7.021,4.65939 0,0.7872 -0.7021,1.25527 -2.38289,1.25527 -1.42547,0 -2.95733,-0.46807 -3.95729,-1.12761 l -1.02123,2.02119 c 1.02123,0.72338 2.91478,1.27655 4.80832,1.27655 z" fill="currentColor"/>
+                        <path d="m 815.82777,215.95919 c -0.40424,0.31913 -0.93614,0.46806 -1.48931,0.46806 -0.99996,0 -1.5744,-0.59572 -1.5744,-1.70206 v -5.40404 h 3.04243 v -2.12757 h -3.04243 v -2.59564 h -2.65947 v 10.19108 c 0,2.51054 1.42547,3.82964 3.91474,3.82964 0.95741,0 1.91482,-0.25531 2.55309,-0.76593 z" fill="currentColor"/>
+                        <path d="m 827.08512,218.68248 c 4.61684,0 8.02096,-3.23391 8.02096,-7.65927 0,-4.42535 -3.40412,-7.65927 -8.02096,-7.65927 -4.61683,0 -8.02095,3.25519 -8.02095,7.65927 0,4.40408 3.40412,7.65927 8.02095,7.65927 z m 0,-2.42543 c -2.99988,0 -5.23383,-2.1914 -5.23383,-5.23384 0,-3.04243 2.23395,-5.23383 5.23383,-5.23383 2.99989,0 5.23384,2.1914 5.23384,5.23383 0,3.04244 -2.23395,5.23384 -5.23384,5.23384 z" fill="currentColor"/>
+                        <path d="m 841.74421,204.68304 c 0.55317,0 1.06379,0.19148 1.46803,0.46807 0.13583,-0.66846 0.57232,-1.53681 0.97419,-1.81179 -0.002,-0.003 -0.11204,-0.0939 -0.22954,-0.18812 -0.59572,-0.42551 -1.48931,-0.61699 -2.40416,-0.61699 -2.6382,0 -4.06367,1.55313 -4.06367,3.93601 v 0.72338 h -1.87227 v 2.12757 h 1.87227 v 9.14858 h 2.65947 v -9.14858 h 3.04243 v -2.12757 h -3.12754 v -0.68083 c 0,-1.21271 0.57445,-1.82971 1.68079,-1.82971 z" fill="currentColor"/>
+                        <path d="m 848.46284,204.68304 c 0.55317,0 1.06379,0.19148 1.44676,0.46807 l 0.74465,-1.99993 c -0.59572,-0.42551 -1.46803,-0.61699 -2.38289,-0.61699 -2.63819,0 -4.08494,1.55313 -4.08494,3.93601 v 11.99953 h 2.65947 v -9.14858 h 3.06371 v -2.12757 h -3.12754 v -0.68083 c 0,-1.21271 0.57445,-1.82971 1.68078,-1.82971 z" fill="currentColor"/>
+                        <path d="m 856.07279,216.36343 c -1.6595,0 -2.8935,-0.7021 -3.44667,-1.99992 l 8.70179,-1.70206 c -0.0213,-3.55305 -2.57437,-5.68063 -5.74446,-5.68063 -3.38284,0 -5.85083,2.42544 -5.85083,5.80828 0,3.38285 2.46799,5.82956 6.27635,5.82956 1.95737,0 3.55305,-0.63828 4.55301,-1.85099 l -1.4042,-1.63824 c -0.82976,0.82976 -1.80844,1.234 -3.08499,1.234 z m -0.48934,-7.25503 c 1.59568,0 2.78713,0.93613 3.14881,2.31905 l -6.42527,1.234 v -0.0213 c 0,-2.17013 1.34037,-3.53177 3.27646,-3.53177 z" fill="currentColor"/>
+                        <path d="m 864.76786,208.76798 v -1.65951 h -2.53182 v 11.36126 h 2.65947 v -5.51042 c 0,-2.31906 1.27655,-3.5105 3.29774,-3.5105 0.19148,0 0.38297,0.0213 0.617,0.0638 v -2.53181 c -1.89354,0 -3.27647,0.59572 -4.04239,1.78716 z" fill="currentColor"/>
+                        <path d="m 873.75836,218.61866 c 3.19137,0 5.14874,-1.38293 5.14874,-3.5105 0,-4.44663 -7.021,-2.40416 -7.021,-4.70194 0,-0.74466 0.76592,-1.27655 2.38288,-1.27655 1.08506,0 2.17013,0.21276 3.25519,0.85103 l 1.02124,-2.0212 c -1.02124,-0.61699 -2.74457,-0.97868 -4.25515,-0.97868 -3.06371,0 -4.99981,1.4042 -4.99981,3.55305 0,4.53174 7.021,2.48926 7.021,4.65939 0,0.7872 -0.7021,1.25527 -2.38288,1.25527 -1.42548,0 -2.95733,-0.46807 -3.95729,-1.12761 l -1.02124,2.02119 c 1.02124,0.72338 2.91478,1.27655 4.80832,1.27655 z" fill="currentColor"/>
+                    </g>
+                </g>
+            </svg>
+        </a>
+        
+        <div class="nav-links-container hidden md:block">
+            <div class="flex gap-10 text-sm font-bold uppercase tracking-widest text-ink px-8">
+                <a href="#problem" class="hover:text-brand transition-colors">Mission</a>
+                <a href="#demo" class="hover:text-brand transition-colors">Platform</a>
+                <a href="#testimonials" class="hover:text-brand transition-colors">Stories</a>
+                <a href="#pricing" class="hover:text-brand transition-colors">Pricing</a>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-4 whitespace-nowrap">
+            <a href="https://forms.ltd/login" class="text-xs md:text-sm font-bold uppercase tracking-widest hover:text-brand hidden md:block">Sign In</a>
+            <a href="https://forms.ltd/register" class="px-5 py-2 md:px-6 md:py-3 bg-ink text-white rounded-full text-[10px] md:text-xs font-bold uppercase tracking-widest hover:bg-brand transition-colors shadow-lg">Get Started</a>
+        </div>
+    </nav>
+
+    <main>
+        <!-- HERO -->
+        <header class="relative min-h-[100svh] flex flex-col justify-center items-center px-4 bg-paper bg-grid-pattern pt-24 md:pt-20 overflow-hidden">
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80vw] md:w-[40vw] h-[80vw] md:h-[40vw] bg-gradient-to-tr from-brand-light to-white rounded-full blur-[80px] md:blur-[100px] opacity-60 pointer-events-none"></div>
+
+            <div class="relative z-20 text-center max-w-6xl w-full">
+                <div class="overflow-hidden mb-2">
+                    <p class="hero-anim translate-y-full font-sans font-bold uppercase tracking-[0.2em] md:tracking-[0.3em] text-brand text-[10px] md:text-sm">Trusted by 400+ Ontario Agents</p>
+                </div>
+                
+                <h1 class="font-serif text-[16vw] md:text-[13vw] leading-[0.9] md:leading-[0.85] font-medium text-ink tracking-tight mb-6 md:mb-8">
+                    <div class="overflow-hidden"><span class="hero-anim block translate-y-full">Offers In</span></div>
+                    <div class="overflow-hidden"><span class="hero-anim block translate-y-full italic text-brand">Seconds.</span></div>
+                </h1>
+
+                <div class="flex flex-col items-center gap-6 md:gap-8 hero-anim opacity-0 translate-y-10 w-full px-2">
+                    <p class="max-w-xl text-base md:text-xl text-ink-light font-sans leading-relaxed text-center">
+                        The operating system for high-performance real estate agents. <br class="hidden md:block"> Validated forms. Automated logic. Instant e-signatures.
+                    </p>
+                    <div class="flex gap-4">
+                        <a href="https://forms.ltd/register" class="group relative px-8 py-4 bg-brand text-white rounded-full overflow-hidden shadow-xl shadow-brand/20 w-full md:w-auto text-center">
+                            <span class="relative z-10 font-bold uppercase tracking-widest text-sm">Start Free Trial</span>
+                            <div class="absolute inset-0 bg-ink transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></div>
+                        </a>
+                    </div>
+
+                    <!-- IMAGE MARQUEE -->
+                    <div class="mt-12 md:mt-20 w-full max-w-5xl mx-auto text-center">
+                        <p class="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-4 md:mb-6">trusted by top professionals at</p>
+                        <div class="overflow-hidden mask-fade-sides relative w-full group">
+                            <div class="flex gap-8 md:gap-16 items-center animate-marquee whitespace-nowrap w-max group-hover:[animation-play-state:paused]">
+                                <img src="https://framerusercontent.com/images/DhLREdLRUealD2Z19mdgQcZVSA.png?width=400&height=155" class="h-5 md:h-8 w-auto opacity-100">
+                                <img src="https://framerusercontent.com/images/m8peJTUIBW8Qls6zGyxssxLgh8.png?width=400&height=155" class="h-5 md:h-8 w-auto opacity-100">
+                                <img src="https://framerusercontent.com/images/l6JFeg2tJvVyz9OhE73DfpmiEXQ.png?width=400&height=155" class="h-5 md:h-8 w-auto opacity-100">
+                                <img src="https://framerusercontent.com/images/juAJkMAqj2cESeQOhFJ3Kgpf7w.png?width=400&height=155" class="h-5 md:h-8 w-auto opacity-100">
+                                <img src="https://framerusercontent.com/images/q5N1fvokXY4PWyVqX76L8etXhs.png?width=400&height=155" class="h-5 md:h-8 w-auto opacity-100">
+                                <!-- Loop -->
+                                <img src="https://framerusercontent.com/images/DhLREdLRUealD2Z19mdgQcZVSA.png?width=400&height=155" class="h-5 md:h-8 w-auto opacity-100">
+                                <img src="https://framerusercontent.com/images/m8peJTUIBW8Qls6zGyxssxLgh8.png?width=400&height=155" class="h-5 md:h-8 w-auto opacity-100">
+                                <img src="https://framerusercontent.com/images/l6JFeg2tJvVyz9OhE73DfpmiEXQ.png?width=400&height=155" class="h-5 md:h-8 w-auto opacity-100">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 3D Layered Cards -->
+            <div class="absolute inset-0 pointer-events-none z-0 overflow-hidden">
+                <div class="absolute top-[15%] -left-10 md:left-[10%] w-48 md:w-64 bg-white p-4 rounded-2xl shadow-2xl border border-gray-100 transform -rotate-6 opacity-40 md:opacity-100 parallax-card" data-speed="0.05">
+                    <div class="flex items-center gap-2 mb-2">
+                        <div class="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center text-green-600 text-[10px]">✓</div>
+                        <div class="text-[10px] font-bold text-gray-400 uppercase">Status</div>
+                    </div>
+                    <div class="font-serif text-lg">Offer Accepted</div>
+                    <div class="text-[10px] text-gray-400">123 King St W</div>
+                </div>
+                <div class="absolute bottom-[20%] -right-10 md:right-[10%] w-48 md:w-64 bg-white p-4 rounded-2xl shadow-2xl border border-gray-100 transform rotate-3 opacity-40 md:opacity-100 parallax-card" data-speed="-0.05">
+                    <div class="flex items-center gap-2 mb-2">
+                        <div class="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-brand text-[10px]">⚡</div>
+                        <div class="text-[10px] font-bold text-gray-400 uppercase">Speed</div>
+                    </div>
+                    <div class="font-serif text-lg">Drafted in 45s</div>
+                </div>
+            </div>
+        </header>
+
+        <!-- PROBLEM SECTION -->
+        <section id="problem" class="py-20 md:py-32 px-6 md:px-20 max-w-7xl mx-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
+                <div class="lg:col-span-4 lg:sticky lg:top-32">
+                    <span class="text-brand font-bold uppercase tracking-widest text-xs mb-4 block">The Reality</span>
+                    <h2 class="font-serif text-4xl md:text-5xl leading-tight mb-4 text-ink">Your time is worth <br><span class="italic text-brand">$1000/hr.</span></h2>
+                    <p class="text-ink-light text-base md:text-lg leading-relaxed">Stop wasting it on administrative friction.</p>
+                </div>
+                <div class="lg:col-span-8">
+                    <p class="font-sans text-2xl md:text-5xl font-light leading-[1.2] text-ink-light mb-12">
+                        Real estate is a speed game. <span class="highlight-text text-ink font-normal">But speed usually kills accuracy.</span> We fixed that. Fast Offers is the first platform that combines <span class="highlight-text text-ink font-normal">blazing automation</span> with strict TRESA compliance.
+                    </p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="border-l-2 border-gray-200 pl-6 hover:border-brand transition-colors duration-500">
+                            <h3 class="font-bold text-xl md:text-2xl mb-2 text-ink">Eliminate Errors</h3>
+                            <p class="text-ink-light text-sm md:text-base leading-relaxed">No more missing clauses. Our logic engine knows if it's a Condo or Freehold and adapts automatically.</p>
+                        </div>
+                        <div class="border-l-2 border-gray-200 pl-6 hover:border-brand transition-colors duration-500">
+                            <h3 class="font-bold text-xl md:text-2xl mb-2 text-ink">Instant Signatures</h3>
+                            <p class="text-ink-light text-sm md:text-base leading-relaxed">Direct integration with DocuSign. Tags are pre-placed. Click send, and the deal is done.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- WORKFLOW SECTION -->
+        <section class="relative py-20 mx-0 md:mx-8">
+            <div class="absolute inset-0 bg-ink md:rounded-[3rem] -z-10 overflow-hidden">
+                <div class="absolute inset-0 opacity-20 bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
+            </div>
+
+            <div class="container mx-auto px-6 py-10 md:py-20 relative text-white" id="demo">
+                
+                <!-- UNIFIED HEADER (Visible on both, sized dynamically) -->
+                <div class="text-center mb-16">
+                    <span class="text-brand-light font-bold uppercase tracking-widest text-xs mb-4 block">The Workflow</span>
+                    <h2 class="font-serif text-5xl md:text-7xl">From Lead to <span class="italic text-brand-light">Signed.</span></h2>
+                </div>
+
+                <!-- MOBILE: STACKED CARDS WITH FULL UI -->
+                <div class="md:hidden relative pb-20">
+                    
+                    <!-- Step 1 Mobile (Sticky) -->
+                    <div class="sticky top-24 mb-8 bg-white rounded-3xl p-5 text-ink shadow-2xl border border-gray-200 z-10">
+                        <div class="mb-6 border-b border-gray-100 pb-4">
+                            <span class="text-brand font-bold text-3xl font-serif block mb-2">01</span>
+                            <h3 class="text-xl font-bold">Direct Injection</h3>
+                            <p class="text-xs text-gray-500 mt-1">Paste MLS number. We pull data instantly.</p>
+                        </div>
+                        <!-- Full UI Block -->
+                        <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
+                            <h4 class="text-xs font-bold text-gray-400 uppercase mb-3">Freehold Agreement</h4>
+                            <div class="bg-blue-50 p-3 rounded-lg flex items-center gap-3 mb-3">
+                                <div class="bg-white p-1.5 rounded-full text-blue-600"><svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" /></svg></div>
+                                <div><div class="text-[8px] font-bold text-blue-400 uppercase">SUBJECT</div><div class="text-xs font-bold text-blue-900">18 Herron Ave</div></div>
+                            </div>
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="text-[9px] font-bold text-gray-400 uppercase ml-1 mb-1 block">Buyer</label>
+                                    <div class="flex gap-2"><input type="text" class="flex-1 bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs" placeholder="Enter Name"><button class="bg-white border border-gray-200 text-brand rounded-lg px-2 text-sm">+</button></div>
+                                </div>
+                                <div class="flex gap-2">
+                                    <div class="w-1/2"><label class="text-[9px] font-bold text-gray-400 uppercase ml-1 mb-1 block">Price</label><input type="text" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs font-bold" value="$1,450,000"></div>
+                                    <div class="w-1/2"><label class="text-[9px] font-bold text-gray-400 uppercase ml-1 mb-1 block">Deposit</label><input type="text" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs font-bold" value="$75,000"></div>
+                                </div>
+                            </div>
+                            <button class="w-full bg-[#100EA0] text-white text-xs font-bold py-3 rounded-lg shadow-lg mt-4">Draft Fast Offer</button>
+                        </div>
+                    </div>
+
+                    <!-- Step 2 Mobile -->
+                    <div class="sticky top-32 mb-8 bg-white rounded-3xl p-5 text-ink shadow-2xl border border-gray-200 z-20">
+                        <div class="mb-6 border-b border-gray-100 pb-4">
+                            <span class="text-brand font-bold text-3xl font-serif block mb-2">02</span>
+                            <h3 class="text-xl font-bold">Context Aware</h3>
+                            <p class="text-xs text-gray-500 mt-1">Logic engine detects Condo vs Freehold.</p>
+                        </div>
+                        <!-- Full UI Block -->
+                        <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
+                            <h4 class="text-xs font-bold text-gray-400 uppercase mb-3">Lease Agreement</h4>
+                            <div class="bg-gray-100 p-3 rounded-lg flex items-center gap-3 mb-3 border border-gray-200">
+                                <div class="bg-white p-1.5 rounded-full text-gray-600"><svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 110 2h-3a1 1 0 01-1-1v-2a1 1 0 00-1-1H9a1 1 0 00-1 1v2a1 1 0 01-1 1H4a1 1 0 110-2V4zm3 1h2v2H7V5zm2 4H7v2h2V9zm2-4h2v2h-2V5zm2 4h-2v2h2V9z" clip-rule="evenodd" /></svg></div>
+                                <div><div class="text-[8px] font-bold text-gray-400 uppercase">CONDO UNIT</div><div class="text-xs font-bold text-gray-900">2329 - 165 Legion Rd</div></div>
+                            </div>
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="text-[9px] font-bold text-gray-400 uppercase ml-1 mb-1 block">Tenant</label>
+                                    <input type="text" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs" placeholder="Full Legal Name">
+                                </div>
+                                <div>
+                                    <label class="text-[9px] font-bold text-gray-400 uppercase ml-1 mb-1 block">Monthly Rent</label>
+                                    <input type="text" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs font-bold" value="$2,850">
+                                </div>
+                            </div>
+                            <div class="mt-3 p-2 bg-green-50 border border-green-100 rounded flex items-center gap-2">
+                                <div class="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+                                <span class="text-[9px] font-bold text-green-800">Status Review Clause Auto-Added</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 3 Mobile -->
+                    <div class="sticky top-40 mb-8 bg-white rounded-3xl p-5 text-ink shadow-2xl border border-gray-200 z-30">
+                        <div class="mb-6 border-b border-gray-100 pb-4">
+                            <span class="text-brand font-bold text-3xl font-serif block mb-2">03</span>
+                            <h3 class="text-xl font-bold">The Kill Shot</h3>
+                            <p class="text-xs text-gray-500 mt-1">Generate PDF & Send via DocuSign.</p>
+                        </div>
+                        <!-- Full UI Block -->
+                        <div class="bg-gray-50 rounded-xl p-6 border border-gray-100 text-center">
+                            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <svg class="w-6 h-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <h4 class="text-sm font-bold text-ink mb-1">Package Generated</h4>
+                            <p class="text-[10px] text-gray-500 mb-4">OREA Forms 100, 320, 801 Validated.</p>
+                            
+                            <div class="w-full bg-white border border-gray-200 rounded-lg p-3 flex items-center gap-3 mb-4 text-left">
+                                <div class="w-8 h-8 bg-red-100 rounded flex items-center justify-center"><span class="text-red-500 font-bold text-[8px]">PDF</span></div>
+                                <div><div class="text-xs font-bold text-gray-800">18 Herron Ave.pdf</div><div class="text-[8px] text-gray-400">2.4 MB</div></div>
+                            </div>
+
+                            <button class="w-full bg-[#100EA0] text-white text-xs font-bold py-3 rounded-lg shadow-lg mb-2 flex items-center justify-center gap-2">
+                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M8.707 7.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l2-2a1 1 0 00-1.414-1.414L11 7.586V3a1 1 0 10-2 0v4.586l-.293-.293z"/><path d="M3 13a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"/></svg> Download
+                            </button>
+                            <button class="w-full border border-gray-300 text-gray-600 text-xs font-bold py-3 rounded-lg">Send to DocuSign</button>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- DESKTOP: SCROLLYTELLING (Hidden < md) -->
+                <div class="hidden md:flex flex-col md:flex-row gap-20 items-start">
+                    <div class="w-full md:w-1/2 h-[80vh] sticky top-24 flex items-center justify-center">
+                        <div class="relative w-[360px] h-[700px] bg-white rounded-[40px] border-8 border-gray-200 shadow-2xl overflow-hidden flex flex-col">
+                            <div class="bg-gray-50 p-6 border-b border-gray-100 flex justify-between items-center">
+                                <span class="font-bold text-ink text-lg">Fast Offers</span>
+                                <div class="w-8 h-8 bg-brand rounded-full text-white flex items-center justify-center text-xs">JS</div>
+                            </div>
+                            <div class="flex-1 relative bg-white">
+                                <!-- Screen 1 -->
+                                <div class="screen-state absolute inset-0 p-6 transition-all duration-500 opacity-100 transform translate-y-0 flex flex-col overflow-hidden" data-step="1">
+                                    <h3 class="text-2xl font-serif text-ink mb-6 anim-item delay-[100ms]">Purchase Agreement</h3>
+                                    <div class="anim-item delay-[150ms] mb-6">
+                                        <div class="bg-blue-50 p-4 rounded-2xl flex items-center gap-4"><div class="bg-white p-2 rounded-full shadow-sm text-blue-600"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" /></svg></div><div><div class="text-[10px] font-bold text-blue-400 uppercase tracking-wider">Subject Property</div><div class="text-sm font-bold text-blue-900">18 Herron Ave</div></div></div>
+                                    </div>
+                                    <div class="space-y-4">
+                                        <div class="anim-item delay-[200ms]"><label class="text-[10px] font-bold text-gray-400 uppercase ml-1 mb-1 block">Buyer</label><input type="text" class="w-full bg-gray-50 border-0 rounded-2xl px-4 py-3 text-sm font-medium outline-none" placeholder="Legal Name"></div>
+                                        <div class="flex gap-3 anim-item delay-[300ms]"><div class="w-1/2"><label class="text-[10px] font-bold text-gray-400 uppercase ml-1 mb-1 block">Price</label><input type="text" class="w-full bg-gray-50 border-0 rounded-2xl py-3 px-4 text-sm font-bold text-ink outline-none" value="$1,450,000"></div><div class="w-1/2"><label class="text-[10px] font-bold text-gray-400 uppercase ml-1 mb-1 block">Deposit</label><input type="text" class="w-full bg-gray-50 border-0 rounded-2xl py-3 px-4 text-sm font-bold text-ink outline-none" value="$75,000"></div></div>
+                                    </div>
+                                    <div class="mt-auto pt-4 anim-item delay-[500ms]"><button class="w-full bg-[#100EA0] text-white font-bold py-4 rounded-2xl shadow-xl text-xs uppercase tracking-widest">Draft Fast Offer</button></div>
+                                </div>
+                                <!-- Screen 2 -->
+                                <div class="screen-state absolute inset-0 p-6 transition-all duration-500 opacity-0 transform translate-y-10 flex flex-col overflow-hidden" data-step="2">
+                                    <h3 class="text-2xl font-serif text-ink mb-6 anim-item delay-[100ms]">Lease Agreement</h3>
+                                    <div class="anim-item delay-[150ms] mb-6">
+                                        <div class="bg-gray-50 p-4 rounded-2xl flex items-center gap-4 border border-gray-100"><div class="bg-white p-2 rounded-full shadow-sm text-gray-600"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 110 2h-3a1 1 0 01-1-1v-2a1 1 0 00-1-1H9a1 1 0 00-1 1v2a1 1 0 01-1 1H4a1 1 0 110-2V4zm3 1h2v2H7V5zm2 4H7v2h2V9zm2-4h2v2h-2V5zm2 4h-2v2h2V9z" clip-rule="evenodd" /></svg></div><div><div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Condo Unit</div><div class="text-sm font-bold text-gray-900">2329 - 165 Legion Rd</div></div></div>
+                                    </div>
+                                    <div class="space-y-4">
+                                        <div class="anim-item delay-[200ms]"><label class="text-[10px] font-bold text-gray-400 uppercase ml-1 mb-1 block">Tenant</label><input type="text" class="w-full bg-gray-50 border-0 rounded-2xl px-4 py-3 text-sm font-medium outline-none" placeholder="Full Legal Name"></div>
+                                        <div class="anim-item delay-[300ms]"><label class="text-[10px] font-bold text-gray-400 uppercase ml-1 mb-1 block">Rent</label><input type="text" class="w-full bg-gray-50 border-0 rounded-2xl py-3 px-4 text-sm font-bold text-ink outline-none" value="$2,850"></div>
+                                    </div>
+                                    <div class="mt-auto pt-4 anim-item delay-[500ms]"><button class="w-full bg-[#100EA0] text-white font-bold py-4 rounded-2xl shadow-xl text-xs uppercase tracking-widest">Draft Fast Offer</button></div>
+                                </div>
+                                <!-- Screen 3 -->
+                                <div class="screen-state absolute inset-0 p-6 transition-all duration-500 opacity-0 transform translate-y-10 flex flex-col items-center justify-center text-center" data-step="3">
+                                    <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-6 animate-bounce"><svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg></div>
+                                    <h3 class="text-xl font-bold text-ink mb-2">Package Generated</h3>
+                                    <p class="text-sm text-gray-500 mb-8">OREA Forms 100, 320, 801 Validated.</p>
+                                    <div class="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 flex items-center gap-4 mb-6 text-left hover:bg-gray-100 transition-colors cursor-pointer"><div class="w-10 h-10 bg-red-100 rounded flex items-center justify-center"><span class="text-red-500 font-bold text-xs">PDF</span></div><div><div class="text-sm font-bold text-gray-800">18 Herron Ave - Offer.pdf</div><div class="text-xs text-gray-400">2.4 MB • Just now</div></div></div>
+                                    <div class="w-full space-y-3"><button class="w-full bg-[#100EA0] text-white font-bold py-3 rounded-lg shadow-lg flex items-center justify-center gap-2">Download PDF</button><button class="w-full border border-gray-300 text-gray-700 font-bold py-3 rounded-lg hover:bg-gray-50">Send to DocuSign</button></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- SCROLLING TEXT (Desktop) -->
+                    <div class="w-full md:w-1/2 pt-20">
+                        <div class="step-block min-h-[70vh] flex flex-col justify-center opacity-30 transition-opacity duration-500" data-target="1">
+                            <span class="text-brand-light text-6xl font-serif block mb-4">01</span>
+                            <h3 class="text-4xl font-bold mb-4">Direct Injection.</h3>
+                            <p class="text-xl text-gray-400">No more typing addresses. Paste the MLS number, and we pull the legal description, seller names, and brokerage details instantly.</p>
+                        </div>
+                        <div class="step-block min-h-[70vh] flex flex-col justify-center opacity-30 transition-opacity duration-500" data-target="2">
+                            <span class="text-brand-light text-6xl font-serif block mb-4">02</span>
+                            <h3 class="text-4xl font-bold mb-4">Context Aware.</h3>
+                            <p class="text-xl text-gray-400">Creating a Condo offer? Our engine knows. It automatically inserts the Status Certificate condition. Freehold? It adds the inspection clause.</p>
+                        </div>
+                        <div class="step-block min-h-[140vh] flex flex-col justify-center opacity-30 transition-opacity duration-500" data-target="3">
+                            <span class="text-brand-light text-6xl font-serif block mb-4">03</span>
+                            <h3 class="text-4xl font-bold mb-4">The Kill Shot.</h3>
+                            <p class="text-xl text-gray-400">One click generates the OREA 100, 320, and 801. We place every initial and signature tag for you.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FEATURES (GLASS BENTO) -->
+        <section class="py-20 md:py-32 px-6 md:px-20 bg-paper bg-grid-pattern">
+            <div class="text-center mb-16 md:mb-20">
+                 <span class="text-brand font-bold uppercase tracking-widest text-xs mb-4 block">Core Engine</span>
+                <h2 class="font-serif text-4xl md:text-6xl">Engineered for <br><span class="italic text-brand">dominance.</span></h2>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-7xl mx-auto h-auto md:h-[600px]">
+                <!-- Card 1 -->
+                <div class="maglev-card rounded-[2.5rem] p-8 md:p-10 md:col-span-1 md:row-span-2 border border-gray-100 shadow-xl relative overflow-hidden group hover-trigger" data-cursor="SPEED">
+                    <div class="scanline opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    <div class="relative z-10 flex flex-col h-full justify-between">
+                        <div>
+                             <div class="w-14 h-14 md:w-16 md:h-16 bg-brand-light rounded-2xl flex items-center justify-center text-brand text-2xl mb-6 md:mb-8">⚡</div>
+                            <h3 class="font-serif text-3xl md:text-4xl mb-4">Blazing Speed</h3>
+                            <p class="text-ink-light text-base md:text-lg">19 minutes of paperwork compressed into 45 seconds.</p>
+                        </div>
+                        <div class="mt-8 pt-8 border-t border-gray-100">
+                             <div class="text-3xl md:text-4xl font-bold text-brand">45s</div>
+                             <div class="text-xs uppercase tracking-widest text-gray-400">Avg. Generation Time</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Card 2 -->
+                <div class="maglev-card rounded-[2.5rem] p-8 md:p-10 md:col-span-2 border border-gray-100 shadow-xl relative overflow-hidden group hover-trigger" data-cursor="SAFE">
+                    <div class="scanline opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                     <div class="relative z-10 flex flex-col md:flex-row items-center gap-8">
+                        <div class="flex-1">
+                             <div class="w-14 h-14 bg-brand-light rounded-2xl flex items-center justify-center text-brand text-2xl mb-6">🛡️</div>
+                            <h3 class="font-serif text-3xl md:text-4xl mb-4">Compliance Engine</h3>
+                            <p class="text-ink-light text-base md:text-lg">Live validation against 2025 TRESA forms. We prevent errors before you hit send.</p>
+                        </div>
+                        <div class="w-full md:w-1/2 bg-gray-50 rounded-2xl p-6 border border-gray-100 hidden md:block">
+                            <div class="flex items-center gap-3 mb-3"><div class="w-4 h-4 rounded-full bg-green-500"></div><div class="text-sm font-bold text-ink">Valid Form 100</div></div>
+                            <div class="flex items-center gap-3"><div class="w-4 h-4 rounded-full bg-green-500"></div><div class="text-sm font-bold text-ink">Valid Schedule A</div></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Card 3 -->
+                <div class="maglev-card rounded-[2.5rem] p-8 md:p-10 md:col-span-2 border border-gray-100 shadow-xl relative overflow-hidden group hover-trigger" data-cursor="EASY">
+                     <div class="scanline opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                     <div class="relative z-10 flex flex-col md:flex-row items-center gap-8">
+                         <div class="w-full md:w-1/2 bg-gray-50 rounded-2xl h-40 border border-gray-100 relative overflow-hidden flex items-center justify-center">
+                            <div class="w-24 h-full bg-white border-x border-gray-200 shadow-sm"></div>
+                         </div>
+                        <div class="flex-1">
+                             <div class="w-14 h-14 bg-brand-light rounded-2xl flex items-center justify-center text-brand text-2xl mb-6">📱</div>
+                            <h3 class="font-serif text-3xl md:text-4xl mb-4">Mobile Command</h3>
+                            <p class="text-ink-light text-base md:text-lg">Full functionality on iOS and Android. Draft, sign, and close deals from your car.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- MUSEUM SCROLL (RESTORED MOBILE HORIZONTAL) -->
+        <section id="museum" class="relative h-screen overflow-hidden bg-white">
+            <div class="horizontal-wrapper">
+                <!-- Slide 1 -->
+                <div class="museum-panel flex flex-col justify-center items-start px-10 md:px-20 border-r border-gray-100 bg-paper">
+                    <span class="text-brand font-bold uppercase tracking-widest text-sm mb-6">The Outcome</span>
+                    <h2 class="font-serif text-6xl md:text-8xl mb-6 text-ink">Total<br><span class="italic text-brand">Dominance.</span></h2>
+                    <div class="w-20 h-1 bg-ink"></div>
+                </div>
+                <!-- Slide 2 -->
+                <div class="museum-panel flex items-center justify-center bg-gray-50 relative border-r border-gray-100">
+                     <div class="w-[70vw] h-[70vh] relative overflow-hidden group shadow-2xl">
+                        <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=2053&auto=format&fit=crop" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 scale-105" alt="Luxury Home">
+                        <div class="absolute inset-0 bg-brand/10 mix-blend-multiply transition-opacity duration-500 group-hover:opacity-0"></div>
+                    </div>
+                    <h2 class="absolute font-serif text-5xl md:text-6xl mix-blend-overlay text-white opacity-80 pointer-events-none">$2B+ in Offers</h2>
+                </div>
+                <!-- Slide 3 -->
+                <div class="museum-panel flex items-center justify-center bg-ink text-white px-6 md:px-10">
+                    <div class="max-w-4xl text-center">
+                        <p class="font-serif text-3xl md:text-6xl leading-tight mb-8">"I beat 12 other offers because mine was in their inbox while the other agents were still driving home."</p>
+                        <div class="flex flex-col items-center justify-center gap-4">
+                            <div class="text-center">
+                                <div class="font-bold uppercase tracking-widest text-sm">Sunny Shahid</div>
+                                <div class="text-brand-light text-xs opacity-70">Broker of Record</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Slide 4 -->
+                <div class="museum-panel flex flex-col items-center justify-center bg-brand text-white">
+                    <h2 class="font-serif text-6xl md:text-[15vw] leading-none mb-10">Start Now</h2>
+                    <a href="https://forms.ltd/register" class="px-12 py-6 bg-white text-brand rounded-full text-xl font-bold hover:scale-110 transition-transform shadow-2xl">Create Account</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- STACKED TESTIMONIALS -->
+        <section id="testimonials" class="relative py-20 md:py-32 bg-off-white">
+            <div class="container mx-auto px-6 md:px-20">
+                <div class="text-center mb-16 md:mb-24">
+                    <span class="text-brand font-bold uppercase tracking-widest text-xs mb-4 block">Stories</span>
+                    <h2 class="font-serif text-4xl md:text-7xl">Top producers<br><span class="italic text-brand">trust the system.</span></h2>
+                </div>
+
+                <div class="relative max-w-4xl mx-auto pb-20"> 
+                    <!-- Card 1 -->
+                    <div class="sticky top-32 mb-12">
+                        <div class="maglev-card bg-white p-8 md:p-12 rounded-[2.5rem] border border-gray-200 shadow-xl min-h-[300px] md:min-h-[400px] flex flex-col justify-between relative z-10">
+                            <p class="font-serif text-2xl md:text-4xl text-ink leading-tight">"The days of second-guessing myself or hunting for the right clause are officially over. I punch in a few details, and it spits out a polished package. I'm hooked."</p>
+                            <div class="flex items-center gap-4 mt-8">
+                                <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=100&h=100" class="w-12 h-12 md:w-14 md:h-14 rounded-full object-cover border border-gray-100">
+                                <div>
+                                    <div class="font-bold text-ink uppercase tracking-widest text-xs md:text-sm">Sunny Shahid</div>
+                                    <div class="text-gray-400 text-[10px] md:text-xs">Broker of Record</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Card 2 -->
+                    <div class="sticky top-40 mb-12">
+                        <div class="maglev-card bg-[#fafafa] p-8 md:p-12 rounded-[2.5rem] border border-gray-200 shadow-xl min-h-[300px] md:min-h-[400px] flex flex-col justify-between relative z-20">
+                            <p class="font-serif text-2xl md:text-4xl text-ink leading-tight">"It takes all the fragmented steps of offer generation and consolidates them into one fluid experience. It's my unfair advantage."</p>
+                            <div class="flex items-center gap-4 mt-8">
+                                <img src="https://images.unsplash.com/photo-1573496359-09a6d90a09cd?auto=format&fit=crop&q=80&w=100&h=100" class="w-12 h-12 md:w-14 md:h-14 rounded-full object-cover border border-gray-100">
+                                <div>
+                                    <div class="font-bold text-ink uppercase tracking-widest text-xs md:text-sm">Emma Pace</div>
+                                    <div class="text-gray-400 text-[10px] md:text-xs">Broker</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Card 3 -->
+                    <div class="sticky top-48 mb-12">
+                        <div class="maglev-card bg-ink text-white p-8 md:p-12 rounded-[2.5rem] border border-gray-800 shadow-2xl min-h-[300px] md:min-h-[400px] flex flex-col justify-between relative z-30">
+                            <p class="font-serif text-2xl md:text-4xl text-white leading-tight">"Onboarding new talent used to mean hours overseeing offer drafting. Fast Offers has been a godsend. Juniors generate perfect offers from day one."</p>
+                            <div class="flex items-center gap-4 mt-8">
+                                <img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&q=80&w=100&h=100" class="w-12 h-12 md:w-14 md:h-14 rounded-full object-cover border-2 border-brand">
+                                <div>
+                                    <div class="font-bold text-white uppercase tracking-widest text-xs md:text-sm">Dave Hutch</div>
+                                    <div class="text-gray-400 text-[10px] md:text-xs">Team Lead</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Card 4 -->
+                    <div class="sticky top-56 mb-12">
+                        <div class="maglev-card bg-white p-8 md:p-12 rounded-[2.5rem] border border-gray-200 shadow-xl min-h-[300px] md:min-h-[400px] flex flex-col justify-between relative z-40">
+                            <p class="font-serif text-2xl md:text-4xl text-ink leading-tight">"The speed at which I can generate compliant offers has completely transformed my workflow. What used to take me 20 minutes now takes under a minute, and I never worry about missing critical clauses."</p>
+                            <div class="flex items-center gap-4 mt-8">
+                                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=100&h=100" class="w-12 h-12 md:w-14 md:h-14 rounded-full object-cover border border-gray-100">
+                                <div>
+                                    <div class="font-bold text-ink uppercase tracking-widest text-xs md:text-sm">Michael Chen</div>
+                                    <div class="text-gray-400 text-[10px] md:text-xs">Senior Agent</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Card 5 -->
+                    <div class="sticky top-64 mb-12">
+                        <div class="maglev-card bg-[#fafafa] p-8 md:p-12 rounded-[2.5rem] border border-gray-200 shadow-xl min-h-[300px] md:min-h-[400px] flex flex-col justify-between relative z-50">
+                            <p class="font-serif text-2xl md:text-4xl text-ink leading-tight">"Fast Offers eliminated the stress of last-minute offer submissions. I can now confidently compete in multiple-offer situations knowing my paperwork is perfect every single time."</p>
+                            <div class="flex items-center gap-4 mt-8">
+                                <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=100&h=100" class="w-12 h-12 md:w-14 md:h-14 rounded-full object-cover border border-gray-100">
+                                <div>
+                                    <div class="font-bold text-ink uppercase tracking-widest text-xs md:text-sm">Sarah Johnson</div>
+                                    <div class="text-gray-400 text-[10px] md:text-xs">Top Producer</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Card 6 -->
+                    <div class="sticky top-72">
+                        <div class="maglev-card bg-ink text-white p-8 md:p-12 rounded-[2.5rem] border border-gray-800 shadow-2xl min-h-[300px] md:min-h-[400px] flex flex-col justify-between relative z-60">
+                            <p class="font-serif text-2xl md:text-4xl text-white leading-tight">"The mobile functionality is a game-changer. I've drafted and sent offers from my car, coffee shops, and even while waiting in line. This platform gives me the edge I need in competitive markets."</p>
+                            <div class="flex items-center gap-4 mt-8">
+                                <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=100&h=100" class="w-12 h-12 md:w-14 md:h-14 rounded-full object-cover border-2 border-brand">
+                                <div>
+                                    <div class="font-bold text-white uppercase tracking-widest text-xs md:text-sm">James Rodriguez</div>
+                                    <div class="text-gray-400 text-[10px] md:text-xs">Broker</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- NEW PRICING -->
+        <section id="pricing" class="relative py-20 md:py-32 bg-white">
+             <div class="container mx-auto px-6 md:px-20 relative z-10">
+                <div class="text-center mb-16">
+                    <span class="text-brand font-bold uppercase tracking-widest text-xs mb-4 block">Membership</span>
+                    <h2 class="font-serif text-4xl md:text-7xl">Invest in your <br><span class="italic text-brand">success.</span></h2>
+                </div>
+                
+                <div class="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+                    <!-- Monthly -->
+                    <div class="maglev-card bg-white p-10 rounded-[2.5rem] border border-gray-200 hover:border-gray-300 transition-colors hover-trigger flex flex-col justify-between min-h-[500px]" data-cursor="SELECT">
+                        <div>
+                            <div class="flex justify-between items-start mb-6">
+                                <h3 class="text-2xl font-bold uppercase text-gray-400 tracking-widest">Monthly</h3>
+                            </div>
+                            <div class="text-6xl font-serif text-ink mb-2">$15<span class="text-lg text-gray-400 font-sans font-normal">/mo</span></div>
+                            <p class="text-gray-400 mb-8 font-sans">Less than the cost of lunch.</p>
+                            <hr class="border-gray-100 mb-8">
+                            <ul class="space-y-4 text-ink mb-8 font-sans font-medium text-lg">
+                                <li class="flex items-center gap-4"><span class="w-2 h-2 rounded-full bg-brand"></span> Unlimited Offers</li>
+                                <li class="flex items-center gap-4"><span class="w-2 h-2 rounded-full bg-brand"></span> 2025 Updated Forms</li>
+                                <li class="flex items-center gap-4"><span class="w-2 h-2 rounded-full bg-brand"></span> PDF Generation</li>
+                            </ul>
+                        </div>
+                        <a href="https://forms.ltd/register" class="block w-full py-5 border border-gray-300 rounded-full text-center font-bold hover:bg-ink hover:text-white transition-colors uppercase tracking-widest text-sm">Select Monthly</a>
+                    </div>
+                    
+                    <!-- Yearly -->
+                    <div class="maglev-card bg-brand-dark text-white p-10 rounded-[2.5rem] border border-brand/50 hover:border-brand transition-colors hover-trigger relative overflow-hidden flex flex-col justify-between min-h-[500px]" data-cursor="SELECT">
+                        <div class="absolute top-0 right-0 bg-white text-brand-dark text-[10px] font-bold px-6 py-3 rounded-bl-2xl uppercase tracking-widest">Best Value</div>
+                        <div>
+                            <div class="flex justify-between items-start mb-6">
+                                <h3 class="text-2xl font-bold uppercase text-white tracking-widest">Yearly</h3>
+                            </div>
+                            <div class="text-6xl font-serif text-white mb-2">$150<span class="text-lg text-gray-300 font-sans font-normal">/yr</span></div>
+                            <p class="text-gray-300 mb-8 font-sans">Commit to dominance.</p>
+                            <hr class="border-white/10 mb-8">
+                            <ul class="space-y-4 text-white mb-8 font-sans font-medium text-lg">
+                                <li class="flex items-center gap-4"><span class="w-2 h-2 rounded-full bg-white"></span> All Monthly Features</li>
+                                <li class="flex items-center gap-4"><span class="w-2 h-2 rounded-full bg-white"></span> <span class="font-bold">DocuSign Integration</span></li>
+                                <li class="flex items-center gap-4"><span class="w-2 h-2 rounded-full bg-white"></span> 2 Months Free</li>
+                            </ul>
+                        </div>
+                        <a href="https://forms.ltd/register" class="block w-full py-5 bg-white text-brand-dark rounded-full text-center font-bold hover:scale-105 transition-transform uppercase tracking-widest text-sm shadow-lg shadow-brand/30">Start Yearly Plan</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="bg-white pt-20 pb-10 px-6 md:px-20 border-t border-gray-100 relative z-20">
+            <div class="flex flex-col md:flex-row justify-between items-end">
+                <svg viewBox="0 0 800 150" class="w-full max-w-4xl h-auto text-gray-100 select-none hover:text-brand transition-colors duration-500" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <g transform="matrix(2.8277243,0,0,2.8277243,-7761.7454,-5281.8881)">
+                        <g transform="matrix(2.6367825,0,0,2.6367825,699.46912,1339.0883)" fill="currentColor">
+                            <text xml:space="preserve" transform="matrix(0.06067336,0,0,0.06067336,803.42442,175.93079)" fill="currentColor"><tspan x="1254.4082" y="703.13993"><tspan>®</tspan></tspan></text>
+                            <path d="m 787.88845,205.89576 v -2.31906 h -10.87191 v 14.89303 h 2.76585 v -5.70191 h 7.19121 v -2.34033 h -7.19121 v -4.53173 z" fill="currentColor"/>
+                            <path d="m 792.71499,206.98082 c -1.82972,0 -3.5956,0.46807 -4.80832,1.4042 l 1.04251,1.93609 c 0.85103,-0.7021 2.17013,-1.12761 3.44667,-1.12761 1.89355,0 2.82968,0.91486 2.82968,2.46799 v 0.1702 h -2.93606 c -3.44667,0 -4.72321,1.4893 -4.72321,3.38285 0,1.97864 1.63823,3.40412 4.23387,3.40412 1.70206,0 2.93606,-0.55317 3.57433,-1.53186 v 1.38293 h 2.51054 v -6.65931 c 0,-3.27647 -1.89354,-4.8296 -5.17001,-4.8296 z m -0.36169,9.70174 c -1.36165,0 -2.17013,-0.61699 -2.17013,-1.5744 0,-0.82976 0.48935,-1.51058 2.29779,-1.51058 h 2.74457 v 1.3191 c -0.44679,1.17016 -1.57441,1.76588 -2.87223,1.76588 z" fill="currentColor"/>
+                            <path d="m 803.60108,218.61866 c 3.19136,0 5.14873,-1.38293 5.14873,-3.5105 0,-4.44663 -7.021,-2.40416 -7.021,-4.70194 0,-0.74466 0.76593,-1.27655 2.38289,-1.27655 1.08506,0 2.17012,0.21276 3.25519,0.85103 l 1.02123,-2.0212 c -1.02123,-0.61699 -2.74457,-0.97868 -4.25515,-0.97868 -3.06371,0 -4.9998,1.4042 -4.9998,3.55305 0,4.53174 7.021,2.48926 7.021,4.65939 0,0.7872 -0.7021,1.25527 -2.38289,1.25527 -1.42547,0 -2.95733,-0.46807 -3.95729,-1.12761 l -1.02123,2.02119 c 1.02123,0.72338 2.91478,1.27655 4.80832,1.27655 z" fill="currentColor"/>
+                            <path d="m 815.82777,215.95919 c -0.40424,0.31913 -0.93614,0.46806 -1.48931,0.46806 -0.99996,0 -1.5744,-0.59572 -1.5744,-1.70206 v -5.40404 h 3.04243 v -2.12757 h -3.04243 v -2.59564 h -2.65947 v 10.19108 c 0,2.51054 1.42547,3.82964 3.91474,3.82964 0.95741,0 1.91482,-0.25531 2.55309,-0.76593 z" fill="currentColor"/>
+                            <path d="m 827.08512,218.68248 c 4.61684,0 8.02096,-3.23391 8.02096,-7.65927 0,-4.42535 -3.40412,-7.65927 -8.02096,-7.65927 -4.61683,0 -8.02095,3.25519 -8.02095,7.65927 0,4.40408 3.40412,7.65927 8.02095,7.65927 z m 0,-2.42543 c -2.99988,0 -5.23383,-2.1914 -5.23383,-5.23384 0,-3.04243 2.23395,-5.23383 5.23383,-5.23383 2.99989,0 5.23384,2.1914 5.23384,5.23383 0,3.04244 -2.23395,5.23384 -5.23384,5.23384 z" fill="currentColor"/>
+                            <path d="m 841.74421,204.68304 c 0.55317,0 1.06379,0.19148 1.46803,0.46807 0.13583,-0.66846 0.57232,-1.53681 0.97419,-1.81179 -0.002,-0.003 -0.11204,-0.0939 -0.22954,-0.18812 -0.59572,-0.42551 -1.48931,-0.61699 -2.40416,-0.61699 -2.6382,0 -4.06367,1.55313 -4.06367,3.93601 v 0.72338 h -1.87227 v 2.12757 h 1.87227 v 9.14858 h 2.65947 v -9.14858 h 3.04243 v -2.12757 h -3.12754 v -0.68083 c 0,-1.21271 0.57445,-1.82971 1.68079,-1.82971 z" fill="currentColor"/>
+                            <path d="m 848.46284,204.68304 c 0.55317,0 1.06379,0.19148 1.44676,0.46807 l 0.74465,-1.99993 c -0.59572,-0.42551 -1.46803,-0.61699 -2.38289,-0.61699 -2.63819,0 -4.08494,1.55313 -4.08494,3.93601 v 11.99953 h 2.65947 v -9.14858 h 3.06371 v -2.12757 h -3.12754 v -0.68083 c 0,-1.21271 0.57445,-1.82971 1.68078,-1.82971 z" fill="currentColor"/>
+                            <path d="m 856.07279,216.36343 c -1.6595,0 -2.8935,-0.7021 -3.44667,-1.99992 l 8.70179,-1.70206 c -0.0213,-3.55305 -2.57437,-5.68063 -5.74446,-5.68063 -3.38284,0 -5.85083,2.42544 -5.85083,5.80828 0,3.38285 2.46799,5.82956 6.27635,5.82956 1.95737,0 3.55305,-0.63828 4.55301,-1.85099 l -1.4042,-1.63824 c -0.82976,0.82976 -1.80844,1.234 -3.08499,1.234 z m -0.48934,-7.25503 c 1.59568,0 2.78713,0.93613 3.14881,2.31905 l -6.42527,1.234 v -0.0213 c 0,-2.17013 1.34037,-3.53177 3.27646,-3.53177 z" fill="currentColor"/>
+                            <path d="m 864.76786,208.76798 v -1.65951 h -2.53182 v 11.36126 h 2.65947 v -5.51042 c 0,-2.31906 1.27655,-3.5105 3.29774,-3.5105 0.19148,0 0.38297,0.0213 0.617,0.0638 v -2.53181 c -1.89354,0 -3.27647,0.59572 -4.04239,1.78716 z" fill="currentColor"/>
+                            <path d="m 873.75836,218.61866 c 3.19137,0 5.14874,-1.38293 5.14874,-3.5105 0,-4.44663 -7.021,-2.40416 -7.021,-4.70194 0,-0.74466 0.76592,-1.27655 2.38288,-1.27655 1.08506,0 2.17013,0.21276 3.25519,0.85103 l 1.02124,-2.0212 c -1.02124,-0.61699 -2.74457,-0.97868 -4.25515,-0.97868 -3.06371,0 -4.99981,1.4042 -4.99981,3.55305 0,4.53174 7.021,2.48926 7.021,4.65939 0,0.7872 -0.7021,1.25527 -2.38288,1.25527 -1.42548,0 -2.95733,-0.46807 -3.95729,-1.12761 l -1.02124,2.02119 c 1.02124,0.72338 2.91478,1.27655 4.80832,1.27655 z" fill="currentColor"/>
+                        </g>
+                    </g>
+                </svg>
+                <div class="text-left md:text-right pb-4 mt-8 md:mt-0">
+                    <div class="flex gap-6 justify-start md:justify-end mb-4 text-sm font-bold uppercase tracking-widest text-ink">
+                        <a href="#" class="hover:text-brand">Twitter</a>
+                        <a href="#" class="hover:text-brand">Instagram</a>
+                        <a href="#" class="hover:text-brand">Email</a>
+                    </div>
+                    <p class="text-xs text-gray-400">© 2025 Fast Offers Inc. Made in Toronto.</p>
+                </div>
+            </div>
+        </footer>
+
+    </main>
+
+    <!-- SCRIPTS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.29/bundled/lenis.min.js"></script>
+
+    <script>
+        // 1. LENIS
+        const lenis = new Lenis({ duration: 1.2, easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), smooth: true });
+        function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
+        requestAnimationFrame(raf);
+        gsap.registerPlugin(ScrollTrigger);
+
+        // 2. PRELOADER
+        const loaderLine = document.querySelector('.loader-line');
+        let progress = 0;
+        const interval = setInterval(() => {
+            progress += Math.floor(Math.random() * 10) + 1;
+            if (progress > 100) progress = 100;
+            loaderLine.style.width = `${progress}%`;
+            if (progress === 100) { clearInterval(interval); revealSite(); }
+        }, 50);
+        function revealSite() {
+            gsap.to('#preloader', { yPercent: -100, duration: 1.2, ease: "power4.inOut" });
+            gsap.to('.hero-anim', { y: 0, opacity: 1, duration: 1.5, stagger: 0.1, ease: "power4.out", delay: 0.5 });
+        }
+
+        // 3. NAV SCROLL
+        window.addEventListener('scroll', () => {
+            const nav = document.querySelector('nav');
+            if(window.scrollY > 100) nav.classList.add('scrolled');
+            else nav.classList.remove('scrolled');
+        });
+
+        // 4. DESKTOP ONLY ANIMATIONS
+        ScrollTrigger.matchMedia({
+            "(min-width: 768px)": function() {
+                // Workflow Sticky
+                const steps = document.querySelectorAll('.step-block');
+                const screens = document.querySelectorAll('.screen-state');
+                steps.forEach((step, i) => {
+                    // Extend scroll duration for last step (step 3)
+                    const isLastStep = i === steps.length - 1;
+                    ScrollTrigger.create({
+                        trigger: step,
+                        start: "top center",
+                        end: isLastStep ? "bottom top" : "bottom center",
+                        onToggle: self => {
+                            if (self.isActive) {
+                                screens.forEach(s => { s.style.opacity = 0; s.style.transform = 'translateY(20px)'; });
+                                if(screens[i]) { screens[i].style.opacity = 1; screens[i].style.transform = 'translateY(0px)'; }
+                                gsap.to(step, { opacity: 1, duration: 0.5 });
+                            } else {
+                                gsap.to(step, { opacity: 0.3, duration: 0.5 });
+                            }
+                        }
+                    });
+                });
+            }
+        });
+
+        // 5. MUSEUM SCROLL (Universal)
+        const museumSection = document.getElementById('museum');
+        const horizontalWrapper = document.querySelector('.horizontal-wrapper');
+        gsap.to(horizontalWrapper, {
+            x: () => -(horizontalWrapper.scrollWidth - window.innerWidth),
+            ease: "none",
+            scrollTrigger: {
+                trigger: "#museum",
+                pin: true,
+                scrub: 1,
+                end: () => "+=" + (horizontalWrapper.scrollWidth - window.innerWidth),
+                invalidateOnRefresh: true
+            }
+        });
+
+        // 6. HIGHLIGHTER
+        gsap.utils.toArray('.highlight-text').forEach(h => {
+            ScrollTrigger.create({ trigger: h, start: "top 80%", onEnter: () => h.classList.add('active') });
+        });
+
+        // 7. MAGLEV CARDS
+        const cards = document.querySelectorAll('.maglev-card');
+        cards.forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                const rotateX = ((y - centerY) / centerY) * -3;
+                const rotateY = ((x - centerX) / centerX) * 3;
+                card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
+                card.style.boxShadow = `${-rotateY * 2}px ${rotateX * 2}px 30px rgba(0,0,0,0.05)`;
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = `rotateX(0) rotateY(0) scale(1)`;
+                card.style.boxShadow = `0 20px 40px rgba(0,0,0,0.03)`;
+            });
+        });
+
+        // 8. CUSTOM CURSOR
+        const cursorBall = document.getElementById('cursor-ball');
+        const cursorText = document.getElementById('cursor-text');
+        window.addEventListener('mousemove', (e) => {
+            gsap.to(cursorBall, { x: e.clientX, y: e.clientY, duration: 0.1 });
+            gsap.to(cursorText, { x: e.clientX, y: e.clientY, duration: 0.15 });
+        });
+        document.querySelectorAll('.hover-trigger').forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                document.body.classList.add('hovering');
+                cursorText.innerText = el.getAttribute('data-cursor') || 'VIEW';
+            });
+            el.addEventListener('mouseleave', () => document.body.classList.remove('hovering'));
+        });
+
+    </script>
+</body>
+</html>
