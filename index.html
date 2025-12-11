@@ -79,6 +79,7 @@
 
     <!-- Fonts: 'Cabinet Grotesk' & 'Gambetta' -->
     <link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@200,300,400,500,700,800&f[]=gambetta@400,500,600,700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -113,7 +114,7 @@
         }
 
         body {
-            background-color: #ffffff;
+            background-color: #100EA0; /* Changed to match Footer Brand Color */
             color: #050505;
             cursor: none;
             overflow-x: hidden;
@@ -333,7 +334,7 @@
         </div>
     </nav>
 
-    <main>
+    <main id="main-content" class="relative z-10 bg-white shadow-2xl">
         <!-- HERO -->
         <header class="relative min-h-[100svh] flex flex-col justify-center items-center px-4 bg-paper bg-grid-pattern pt-24 md:pt-20 overflow-hidden">
             <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80vw] md:w-[40vw] h-[80vw] md:h-[40vw] bg-gradient-to-tr from-brand-light to-white rounded-full blur-[80px] md:blur-[100px] opacity-60 pointer-events-none"></div>
@@ -1301,47 +1302,69 @@
             </div>
         </section>
 
-        <!-- FOOTER -->
-        <footer class="bg-white pt-20 pb-10 px-6 md:px-20 border-t border-gray-100 relative z-20">
-            <div class="flex flex-col md:flex-row justify-between items-center md:items-end">
-                <div class="text-gray-100 select-none hover:text-brand transition-colors duration-500 w-full md:w-auto flex justify-center md:justify-start" aria-label="Fast Offers">
-                <svg viewBox="0 0 800 150" class="h-[12vw] w-auto fill-current" xmlns="http://www.w3.org/2000/svg">
-                    <defs id="defs1159-footer">
-                        <rect x="1254.4073" y="659.0235" width="823.07227" height="253.92419" id="rect1538-footer" />
-                    </defs>
-                    <g id="layer1-footer">
-                        <g id="g19965-footer" transform="matrix(2.8277243,0,0,2.8277243,-7761.7454,-5281.8881)">
-                            <g id="g12120-footer" transform="matrix(2.6367825,0,0,2.6367825,699.46912,1339.0883)" style="fill:currentColor;fill-opacity:1">
-                                <text xml:space="preserve" transform="matrix(0.06067336,0,0,0.06067336,803.42442,175.93079)" id="text1536-footer" style="font-style:italic;font-size:48px;line-height:1.25;font-family:'Franklin Gothic Medium';-inkscape-font-specification:'Franklin Gothic Medium,  Italic';letter-spacing:-1.04px;white-space:pre;shape-inside:url(#rect1538-footer);fill:currentColor;fill-opacity:1">
-                                    <tspan x="1254.4082" y="703.13993" id="tspan1351-footer"><tspan style="font-style:normal;font-weight:600;font-family:Montserrat;-inkscape-font-specification:'Montserrat Semi-Bold';letter-spacing:-1.65945px" id="tspan1349-footer">®</tspan></tspan>
-                                </text>
-                                <path d="m 787.88845,205.89576 v -2.31906 h -10.87191 v 14.89303 h 2.76585 v -5.70191 h 7.19121 v -2.34033 h -7.19121 v -4.53173 z" style="font-style:normal;font-weight:600;font-size:48px;line-height:1.25;font-family:Montserrat;-inkscape-font-specification:'Montserrat Semi-Bold';letter-spacing:-1.65945px;white-space:pre;fill:currentColor;fill-opacity:1;stroke-width:0.443245" id="path64288-footer" />
-                                <path d="m 792.71499,206.98082 c -1.82972,0 -3.5956,0.46807 -4.80832,1.4042 l 1.04251,1.93609 c 0.85103,-0.7021 2.17013,-1.12761 3.44667,-1.12761 1.89355,0 2.82968,0.91486 2.82968,2.46799 v 0.1702 h -2.93606 c -3.44667,0 -4.72321,1.4893 -4.72321,3.38285 0,1.97864 1.63823,3.40412 4.23387,3.40412 1.70206,0 2.93606,-0.55317 3.57433,-1.53186 v 1.38293 h 2.51054 v -6.65931 c 0,-3.27647 -1.89354,-4.8296 -5.17001,-4.8296 z m -0.36169,9.70174 c -1.36165,0 -2.17013,-0.61699 -2.17013,-1.5744 0,-0.82976 0.48935,-1.51058 2.29779,-1.51058 h 2.74457 v 1.3191 c -0.44679,1.17016 -1.57441,1.76588 -2.87223,1.76588 z" style="font-style:normal;font-weight:600;font-size:48px;line-height:1.25;font-family:Montserrat;-inkscape-font-specification:'Montserrat Semi-Bold';letter-spacing:-1.65945px;white-space:pre;fill:currentColor;fill-opacity:1;stroke-width:0.443245" id="path64290-footer" />
-                                <path d="m 803.60108,218.61866 c 3.19136,0 5.14873,-1.38293 5.14873,-3.5105 0,-4.44663 -7.021,-2.40416 -7.021,-4.70194 0,-0.74466 0.76593,-1.27655 2.38289,-1.27655 1.08506,0 2.17012,0.21276 3.25519,0.85103 l 1.02123,-2.0212 c -1.02123,-0.61699 -2.74457,-0.97868 -4.25515,-0.97868 -3.06371,0 -4.9998,1.4042 -4.9998,3.55305 0,4.53174 7.021,2.48926 7.021,4.65939 0,0.7872 -0.7021,1.25527 -2.38289,1.25527 -1.42547,0 -2.95733,-0.46807 -3.95729,-1.12761 l -1.02123,2.02119 c 1.02123,0.72338 2.91478,1.27655 4.80832,1.27655 z" style="font-style:normal;font-weight:600;font-size:48px;line-height:1.25;font-family:Montserrat;-inkscape-font-specification:'Montserrat Semi-Bold';letter-spacing:-1.04px;white-space:pre;fill:currentColor;fill-opacity:1;stroke-width:0.443245" id="path64292-footer" />
-                                <path d="m 815.82777,215.95919 c -0.40424,0.31913 -0.93614,0.46806 -1.48931,0.46806 -0.99996,0 -1.5744,-0.59572 -1.5744,-1.70206 v -5.40404 h 3.04243 v -2.12757 h -3.04243 v -2.59564 h -2.65947 v 10.19108 c 0,2.51054 1.42547,3.82964 3.91474,3.82964 0.95741,0 1.91482,-0.25531 2.55309,-0.76593 z" style="font-style:normal;font-weight:600;font-size:48px;line-height:1.25;font-family:'Montserrat Alternates';-inkscape-font-specification:'Montserrat Alternates Semi-Bold';letter-spacing:-1.04px;white-space:pre;fill:currentColor;fill-opacity:1;stroke-width:0.443245" id="path64294-footer" />
-                                <path d="m 827.08512,218.68248 c 4.61684,0 8.02096,-3.23391 8.02096,-7.65927 0,-4.42535 -3.40412,-7.65927 -8.02096,-7.65927 -4.61683,0 -8.02095,3.25519 -8.02095,7.65927 0,4.40408 3.40412,7.65927 8.02095,7.65927 z m 0,-2.42543 c -2.99988,0 -5.23383,-2.1914 -5.23383,-5.23384 0,-3.04243 2.23395,-5.23383 5.23383,-5.23383 2.99989,0 5.23384,2.1914 5.23384,5.23383 0,3.04244 -2.23395,5.23384 -5.23384,5.23384 z" style="font-style:normal;font-weight:600;font-size:48px;line-height:1.25;font-family:Montserrat;-inkscape-font-specification:'Montserrat Semi-Bold';letter-spacing:-1.04px;white-space:pre;fill:currentColor;fill-opacity:1;stroke-width:0.443245" id="path64296-footer" />
-                                <path d="m 841.74421,204.68304 c 0.55317,0 1.06379,0.19148 1.46803,0.46807 0.13583,-0.66846 0.57232,-1.53681 0.97419,-1.81179 -0.002,-0.003 -0.11204,-0.0939 -0.22954,-0.18812 -0.59572,-0.42551 -1.48931,-0.61699 -2.40416,-0.61699 -2.6382,0 -4.06367,1.55313 -4.06367,3.93601 v 0.72338 h -1.87227 v 2.12757 h 1.87227 v 9.14858 h 2.65947 v -9.14858 h 3.04243 v -2.12757 h -3.12754 v -0.68083 c 0,-1.21271 0.57445,-1.82971 1.68079,-1.82971 z" style="font-style:normal;font-weight:600;font-size:48px;line-height:1.25;font-family:Montserrat;-inkscape-font-specification:'Montserrat Semi-Bold';letter-spacing:-1.04px;white-space:pre;fill:currentColor;fill-opacity:1;stroke-width:0.443245" id="path64298-footer" />
-                                <path d="m 848.46284,204.68304 c 0.55317,0 1.06379,0.19148 1.44676,0.46807 l 0.74465,-1.99993 c -0.59572,-0.42551 -1.46803,-0.61699 -2.38289,-0.61699 -2.63819,0 -4.08494,1.55313 -4.08494,3.93601 v 11.99953 h 2.65947 v -9.14858 h 3.06371 v -2.12757 h -3.12754 v -0.68083 c 0,-1.21271 0.57445,-1.82971 1.68078,-1.82971 z" style="font-style:normal;font-weight:600;font-size:48px;line-height:1.25;font-family:'Montserrat Alternates';-inkscape-font-specification:'Montserrat Alternates Semi-Bold';letter-spacing:-1.04px;white-space:pre;fill:currentColor;fill-opacity:1;stroke-width:0.443245" id="path64300-footer" />
-                                <path d="m 856.07279,216.36343 c -1.6595,0 -2.8935,-0.7021 -3.44667,-1.99992 l 8.70179,-1.70206 c -0.0213,-3.55305 -2.57437,-5.68063 -5.74446,-5.68063 -3.38284,0 -5.85083,2.42544 -5.85083,5.80828 0,3.38285 2.46799,5.82956 6.27635,5.82956 1.95737,0 3.55305,-0.63828 4.55301,-1.85099 l -1.4042,-1.63824 c -0.82976,0.82976 -1.80844,1.234 -3.08499,1.234 z m -0.48934,-7.25503 c 1.59568,0 2.78713,0.93613 3.14881,2.31905 l -6.42527,1.234 v -0.0213 c 0,-2.17013 1.34037,-3.53177 3.27646,-3.53177 z" style="font-style:normal;font-weight:600;font-size:48px;line-height:1.25;font-family:'Montserrat Alternates';-inkscape-font-specification:'Montserrat Alternates Semi-Bold';letter-spacing:-1.04px;white-space:pre;fill:currentColor;fill-opacity:1;stroke-width:0.443245" id="path64302-footer" />
-                                <path d="m 864.76786,208.76798 v -1.65951 h -2.53182 v 11.36126 h 2.65947 v -5.51042 c 0,-2.31906 1.27655,-3.5105 3.29774,-3.5105 0.19148,0 0.38297,0.0213 0.617,0.0638 v -2.53181 c -1.89354,0 -3.27647,0.59572 -4.04239,1.78716 z" style="font-style:normal;font-weight:600;font-size:48px;line-height:1.25;font-family:Montserrat;-inkscape-font-specification:'Montserrat Semi-Bold';letter-spacing:-1.04px;white-space:pre;fill:currentColor;fill-opacity:1;stroke-width:0.443245" id="path64304-footer" />
-                                <path d="m 873.75836,218.61866 c 3.19137,0 5.14874,-1.38293 5.14874,-3.5105 0,-4.44663 -7.021,-2.40416 -7.021,-4.70194 0,-0.74466 0.76592,-1.27655 2.38288,-1.27655 1.08506,0 2.17013,0.21276 3.25519,0.85103 l 1.02124,-2.0212 c -1.02124,-0.61699 -2.74457,-0.97868 -4.25515,-0.97868 -3.06371,0 -4.99981,1.4042 -4.99981,3.55305 0,4.53174 7.021,2.48926 7.021,4.65939 0,0.7872 -0.7021,1.25527 -2.38288,1.25527 -1.42548,0 -2.95733,-0.46807 -3.95729,-1.12761 l -1.02124,2.02119 c 1.02124,0.72338 2.91478,1.27655 4.80832,1.27655 z" style="font-style:normal;font-weight:600;font-size:48px;line-height:1.25;font-family:'Montserrat Alternates';-inkscape-font-specification:'Montserrat Alternates Semi-Bold';letter-spacing:-1.04px;white-space:pre;fill:currentColor;fill-opacity:1;stroke-width:0.443245" id="path64306-footer" />
-                            </g>
-                        </g>
-                    </g>
-                </svg>
+    </main>
+
+    <!-- FOOTER (Moved outside main for Curtain Effect) -->
+    <footer id="site-footer" class="bg-brand pt-32 pb-12 px-6 md:px-20 border-t border-brand-dark fixed bottom-0 left-0 w-full z-0 text-white">
+        
+        <!-- Large Background Text/Pattern -->
+        <div class="absolute inset-0 overflow-hidden pointer-events-none opacity-5">
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 md:top-[-20%] md:right-[-10%] md:left-auto md:translate-x-0 md:translate-y-0 text-[80vw] md:text-[40vw] font-thin leading-none select-none text-white tracking-tighter" style="font-family: 'Montserrat', sans-serif;">
+                FO
             </div>
-                <div class="text-center md:text-right pb-4 w-full md:w-auto mt-8 md:mt-0">
-                    <div class="flex gap-6 justify-center md:justify-end mb-4 text-sm font-bold uppercase tracking-widest text-ink">
-                        <a href="https://www.youtube.com/@fastoffers" class="hover:text-brand">YouTube</a>
-                        <a href="https://www.instagram.com/fastoffers.ca/" class="hover:text-brand">Instagram</a>
-                        <a href="mailto:support@fastoffers.ca" class="hover:text-brand">Email</a>
-                    </div>
-                    <p class="text-xs text-gray-400">© 2025 Fast Offers Inc. Made in Toronto.</p>
+        </div>
+
+        <div class="relative z-10 max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-end gap-12 md:gap-0">
+            
+            <!-- Left: Big CTA -->
+            <div class="hidden md:flex flex-col gap-8 max-w-2xl">
+                <h2 class="text-5xl md:text-8xl font-serif leading-[0.9] tracking-tight">
+                    Ready to save <br>
+                    <span class="italic text-brand-light opacity-80">your time?</span>
+                </h2>
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <a href="https://forms.ltd/register" class="px-8 py-4 bg-white text-brand rounded-full font-bold uppercase tracking-widest text-sm hover:bg-brand-light transition-colors w-fit hover-trigger shadow-lg" data-cursor="START">
+                        Start Free Trial
+                    </a>
                 </div>
             </div>
-        </footer>
 
-    </main>
+            <!-- Right: Logo & Links -->
+            <div class="flex flex-col items-center md:items-end gap-8 w-full md:w-auto">
+                
+                <!-- Logo -->
+                <div class="text-white select-none w-full md:w-auto flex justify-center md:justify-end opacity-90 hover:opacity-100 transition-opacity" aria-label="Fast Offers">
+                    <svg viewBox="0 0 800 150" class="h-16 md:h-20 w-auto fill-current" xmlns="http://www.w3.org/2000/svg">
+                        <g transform="matrix(2.8277243,0,0,2.8277243,-7761.7454,-5281.8881)">
+                            <g transform="matrix(2.6367825,0,0,2.6367825,699.46912,1339.0883)" fill="currentColor">
+                                <text xml:space="preserve" transform="matrix(0.06067336,0,0,0.06067336,803.42442,175.93079)" fill="currentColor"><tspan x="1254.4082" y="703.13993"><tspan>®</tspan></tspan></text>
+                                <path d="m 787.88845,205.89576 v -2.31906 h -10.87191 v 14.89303 h 2.76585 v -5.70191 h 7.19121 v -2.34033 h -7.19121 v -4.53173 z" fill="currentColor"/>
+                                <path d="m 792.71499,206.98082 c -1.82972,0 -3.5956,0.46807 -4.80832,1.4042 l 1.04251,1.93609 c 0.85103,-0.7021 2.17013,-1.12761 3.44667,-1.12761 1.89355,0 2.82968,0.91486 2.82968,2.46799 v 0.1702 h -2.93606 c -3.44667,0 -4.72321,1.4893 -4.72321,3.38285 0,1.97864 1.63823,3.40412 4.23387,3.40412 1.70206,0 2.93606,-0.55317 3.57433,-1.53186 v 1.38293 h 2.51054 v -6.65931 c 0,-3.27647 -1.89354,-4.8296 -5.17001,-4.8296 z m -0.36169,9.70174 c -1.36165,0 -2.17013,-0.61699 -2.17013,-1.5744 0,-0.82976 0.48935,-1.51058 2.29779,-1.51058 h 2.74457 v 1.3191 c -0.44679,1.17016 -1.57441,1.76588 -2.87223,1.76588 z" fill="currentColor"/>
+                                <path d="m 803.60108,218.61866 c 3.19136,0 5.14873,-1.38293 5.14873,-3.5105 0,-4.44663 -7.021,-2.40416 -7.021,-4.70194 0,-0.74466 0.76593,-1.27655 2.38289,-1.27655 1.08506,0 2.17012,0.21276 3.25519,0.85103 l 1.02123,-2.0212 c -1.02123,-0.61699 -2.74457,-0.97868 -4.25515,-0.97868 -3.06371,0 -4.9998,1.4042 -4.9998,3.55305 0,4.53174 7.021,2.48926 7.021,4.65939 0,0.7872 -0.7021,1.25527 -2.38289,1.25527 -1.42547,0 -2.95733,-0.46807 -3.95729,-1.12761 l -1.02123,2.02119 c 1.02123,0.72338 2.91478,1.27655 4.80832,1.27655 z" fill="currentColor"/>
+                                <path d="m 815.82777,215.95919 c -0.40424,0.31913 -0.93614,0.46806 -1.48931,0.46806 -0.99996,0 -1.5744,-0.59572 -1.5744,-1.70206 v -5.40404 h 3.04243 v -2.12757 h -3.04243 v -2.59564 h -2.65947 v 10.19108 c 0,2.51054 1.42547,3.82964 3.91474,3.82964 0.95741,0 1.91482,-0.25531 2.55309,-0.76593 z" fill="currentColor"/>
+                                <path d="m 827.08512,218.68248 c 4.61684,0 8.02096,-3.23391 8.02096,-7.65927 0,-4.42535 -3.40412,-7.65927 -8.02096,-7.65927 -4.61683,0 -8.02095,3.25519 -8.02095,7.65927 0,4.40408 3.40412,7.65927 8.02095,7.65927 z m 0,-2.42543 c -2.99988,0 -5.23383,-2.1914 -5.23383,-5.23384 0,-3.04243 2.23395,-5.23383 5.23383,-5.23383 2.99989,0 5.23384,2.1914 5.23384,5.23383 0,3.04244 -2.23395,5.23384 -5.23384,5.23384 z" fill="currentColor"/>
+                                <path d="m 841.74421,204.68304 c 0.55317,0 1.06379,0.19148 1.46803,0.46807 0.13583,-0.66846 0.57232,-1.53681 0.97419,-1.81179 -0.002,-0.003 -0.11204,-0.0939 -0.22954,-0.18812 -0.59572,-0.42551 -1.48931,-0.61699 -2.40416,-0.61699 -2.6382,0 -4.06367,1.55313 -4.06367,3.93601 v 0.72338 h -1.87227 v 2.12757 h 1.87227 v 9.14858 h 2.65947 v -9.14858 h 3.04243 v -2.12757 h -3.12754 v -0.68083 c 0,-1.21271 0.57445,-1.82971 1.68079,-1.82971 z" fill="currentColor"/>
+                                <path d="m 848.46284,204.68304 c 0.55317,0 1.06379,0.19148 1.44676,0.46807 l 0.74465,-1.99993 c -0.59572,-0.42551 -1.46803,-0.61699 -2.38289,-0.61699 -2.63819,0 -4.08494,1.55313 -4.08494,3.93601 v 11.99953 h 2.65947 v -9.14858 h 3.06371 v -2.12757 h -3.12754 v -0.68083 c 0,-1.21271 0.57445,-1.82971 1.68078,-1.82971 z" fill="currentColor"/>
+                                <path d="m 856.07279,216.36343 c -1.6595,0 -2.8935,-0.7021 -3.44667,-1.99992 l 8.70179,-1.70206 c -0.0213,-3.55305 -2.57437,-5.68063 -5.74446,-5.68063 -3.38284,0 -5.85083,2.42544 -5.85083,5.80828 0,3.38285 2.46799,5.82956 6.27635,5.82956 1.95737,0 3.55305,-0.63828 4.55301,-1.85099 l -1.4042,-1.63824 c -0.82976,0.82976 -1.80844,1.234 -3.08499,1.234 z m -0.48934,-7.25503 c 1.59568,0 2.78713,0.93613 3.14881,2.31905 l -6.42527,1.234 v -0.0213 c 0,-2.17013 1.34037,-3.53177 3.27646,-3.53177 z" fill="currentColor"/>
+                                <path d="m 864.76786,208.76798 v -1.65951 h -2.53182 v 11.36126 h 2.65947 v -5.51042 c 0,-2.31906 1.27655,-3.5105 3.29774,-3.5105 0.19148,0 0.38297,0.0213 0.617,0.0638 v -2.53181 c -1.89354,0 -3.27647,0.59572 -4.04239,1.78716 z" fill="currentColor"/>
+                                <path d="m 873.75836,218.61866 c 3.19137,0 5.14874,-1.38293 5.14874,-3.5105 0,-4.44663 -7.021,-2.40416 -7.021,-4.70194 0,-0.74466 0.76592,-1.27655 2.38288,-1.27655 1.08506,0 2.17013,0.21276 3.25519,0.85103 l 1.02124,-2.0212 c -1.02124,-0.61699 -2.74457,-0.97868 -4.25515,-0.97868 -3.06371,0 -4.99981,1.4042 -4.99981,3.55305 0,4.53174 7.021,2.48926 7.021,4.65939 0,0.7872 -0.7021,1.25527 -2.38288,1.25527 -1.42548,0 -2.95733,-0.46807 -3.95729,-1.12761 l -1.02124,2.02119 c 1.02124,0.72338 2.91478,1.27655 4.80832,1.27655 z" fill="currentColor"/>
+                            </g>
+                        </g>
+                    </svg>
+                </div>
+
+                <div class="flex gap-6 text-xs md:text-sm font-bold uppercase tracking-widest text-brand-light/70">
+                    <a href="https://www.youtube.com/@fastoffers" class="hover:text-white transition-colors">YouTube</a>
+                    <a href="https://www.instagram.com/fastoffers.ca/" class="hover:text-white transition-colors">Instagram</a>
+                </div>
+
+                <div class="text-[10px] md:text-xs text-brand-light/40 uppercase tracking-widest">
+                    © 2025 Fast Offers Inc. Made in Toronto.
+                </div>
+            </div>
+
+        </div>
+    </footer>
 
     <!-- SCRIPTS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
@@ -1489,6 +1512,84 @@
                 el.addEventListener('mouseleave', () => document.body.classList.remove('hovering'));
             });
         }
+
+        // 10. THEATRICAL FOOTER REVEAL
+        function initFooterReveal() {
+            const footer = document.getElementById('site-footer');
+            const mainContent = document.getElementById('main-content');
+            
+            if (!footer || !mainContent) return;
+
+            function updateFooterHeight() {
+                const footerHeight = footer.offsetHeight;
+                mainContent.style.marginBottom = `${footerHeight}px`;
+                ScrollTrigger.refresh();
+            }
+
+            // Initial calc
+            updateFooterHeight();
+            
+            // Recalc on resize
+            window.addEventListener('resize', updateFooterHeight);
+
+            // GSAP Animation for "Curtain" effect
+            ScrollTrigger.create({
+                trigger: mainContent,
+                start: "bottom bottom", 
+                end: () => `+=${footer.offsetHeight}`,
+                scrub: true,
+                onUpdate: (self) => {
+                    const p = self.progress;
+                    
+                    if (p <= 0) {
+                        // CRITICAL FIX: Restore overflow: visible so sticky elements work when scrolling back up
+                        gsap.set(mainContent, { clearProps: "transform,filter,borderRadius,boxShadow,overflow" });
+                        mainContent.style.overflow = "visible"; // Explicit safety
+                    } else {
+                        const scale = 1 - (p * 0.05);
+                        
+                        // Check for mobile
+                        const isMobile = window.innerWidth < 768;
+                        
+                        // Radius: 50px on mobile, 20px on desktop
+                        const maxRadius = isMobile ? 60 : 100;
+                        const radius = p * maxRadius; 
+                        
+                        // Shadow opacity: Subtle on mobile (0.2), Strong on desktop (0.6)
+                        const baseOpacity = isMobile ? 0.2 : 0.6;
+                        const dynamicOpacity = isMobile ? 0.2 : 0.4;
+                        
+                        gsap.set(mainContent, { 
+                            scale: scale,
+                            borderRadius: `0 0 ${radius}px ${radius}px`,
+                            overflow: "hidden", 
+                            transformOrigin: "center bottom",
+                            boxShadow: `0 80px 100px -40px rgba(0,0,0,${baseOpacity + p*dynamicOpacity})`
+                        });
+                    }
+                    
+                    gsap.set(footer, {
+                        scale: 0.95 + (p * 0.05),
+                        opacity: 1 
+                    });
+                },
+                onLeaveBack: () => {
+                    // Force clear on leaving back to be safe
+                    gsap.set(mainContent, { clearProps: "transform,filter,borderRadius,boxShadow,overflow" });
+                    mainContent.style.overflow = "visible";
+                }
+            });
+            
+            // Ensure footer is visible initially
+            gsap.set(footer, { opacity: 1, scale: 0.95 });
+            
+            // Clean up any potential lingering transforms, BUT PRESERVE MARGIN-BOTTOM
+            // 'clearProps: all' was removing the margin-bottom needed for the scroll!
+            gsap.set(mainContent, { clearProps: "transform,filter,borderRadius,boxShadow,overflow" });
+        }
+
+        // Initialize after a slight delay
+        setTimeout(initFooterReveal, 100);
 
     </script>
     <script type="text/javascript">
