@@ -259,8 +259,26 @@
         .screen-state[style*="opacity: 1"] .anim-item { opacity: 1; transform: translateY(0); }
 
         /* Layouts */
-        .horizontal-wrapper { display: flex; flex-wrap: nowrap; width: fit-content; height: 100%; }
-        .museum-panel { width: 100vw; height: 100svh; flex-shrink: 0; position: relative; }
+        .horizontal-wrapper { 
+            display: flex; 
+            flex-wrap: nowrap; 
+            width: fit-content; 
+            height: 100%; 
+            will-change: transform;
+            transform: translateZ(0);
+            -webkit-transform: translateZ(0);
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+        .museum-panel { 
+            width: 100vw; 
+            height: 100svh; 
+            flex-shrink: 0; 
+            position: relative;
+            transform: translateZ(0);
+            -webkit-transform: translateZ(0);
+            will-change: transform;
+        }
         
         /* Marquee */
         @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
@@ -1404,6 +1422,12 @@
         
         if (isMobile) {
             // Mobile: Slower scroll with padding for first/last slides
+            // Enable hardware acceleration
+            gsap.set(horizontalWrapper, { 
+                force3D: true,
+                transformOrigin: "left center"
+            });
+            
             const scrollMultiplier = 2.5;
             const firstSlidePadding = window.innerHeight * 0.3;
             const lastSlidePadding = window.innerHeight * 1.2;
@@ -1414,10 +1438,11 @@
                 scrollTrigger: {
                     trigger: "#museum",
                     pin: true,
-                    scrub: 4,
+                    scrub: 3, // Reduced from 4 for smoother animation
                     start: "top top",
                     end: () => "+=" + totalScrollDistance,
-                    invalidateOnRefresh: true
+                    invalidateOnRefresh: true,
+                    anticipatePin: 1 // Better pinning performance
                 }
             });
             
@@ -1425,11 +1450,27 @@
             const lastPaddingRatio = lastSlidePadding / totalScrollDistance;
             const middleRatio = baseScrollDistance / totalScrollDistance;
             
+            // Use xPercent for better performance, force3D for hardware acceleration
             museumTL
-                .set(horizontalWrapper, { x: 0 })
-                .to(horizontalWrapper, { x: 0, duration: firstPaddingRatio, ease: "none" })
-                .to(horizontalWrapper, { x: -horizontalDistance, duration: middleRatio, ease: "none" })
-                .to(horizontalWrapper, { x: -horizontalDistance, duration: lastPaddingRatio, ease: "none" });
+                .set(horizontalWrapper, { x: 0, force3D: true })
+                .to(horizontalWrapper, { 
+                    x: 0, 
+                    duration: firstPaddingRatio, 
+                    ease: "none",
+                    force3D: true
+                })
+                .to(horizontalWrapper, { 
+                    x: -horizontalDistance, 
+                    duration: middleRatio, 
+                    ease: "none",
+                    force3D: true
+                })
+                .to(horizontalWrapper, { 
+                    x: -horizontalDistance, 
+                    duration: lastPaddingRatio, 
+                    ease: "none",
+                    force3D: true
+                });
         } else {
             // Desktop: Original simple implementation
             gsap.to(horizontalWrapper, {
