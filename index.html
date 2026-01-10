@@ -116,7 +116,6 @@
         body {
             background-color: #100EA0; /* Changed to match Footer Brand Color */
             color: #050505;
-            cursor: none;
             overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
             margin: 0;
@@ -130,29 +129,6 @@
         .noise { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9000; opacity: 0.04; background: url('https://grainy-gradients.vercel.app/noise.svg'); mix-blend-mode: multiply; }
 
 
-        /* --- CURSOR --- */
-        #cursor-ball {
-            width: 12px; height: 12px; background: var(--brand);
-            position: fixed; top: 0; left: 0; border-radius: 50%;
-            pointer-events: none; z-index: 9999; transform: translate(-50%, -50%);
-            transition: width 0.3s, height 0.3s, background 0.3s;
-        }
-        #cursor-text {
-            position: fixed; top: 0; left: 0; z-index: 9999;
-            pointer-events: none; transform: translate(-50%, -50%);
-            font-family: 'Cabinet Grotesk', sans-serif; font-weight: 700;
-            font-size: 10px; text-transform: uppercase; color: white; opacity: 0;
-            transition: opacity 0.3s;
-        }
-        body.hovering #cursor-ball {
-            width: 80px; height: 80px; background: #050505; opacity: 0.9;
-        }
-        body.hovering #cursor-text { opacity: 1; }
-        
-        /* Hide cursor on mobile */
-        @media (max-width: 767px) {
-            #cursor-ball, #cursor-text { display: none !important; }
-        }
 
         /* Animations */
         .highlight-text { background: linear-gradient(120deg, transparent 50%, #EBEBFF 50%); background-size: 250% 100%; background-position: 0% 0%; transition: background-position 0.8s ease-out; }
@@ -295,8 +271,6 @@
 <body class="antialiased selection:bg-brand selection:text-white" oncontextmenu="return false;">
 
     <div class="noise"></div>
-    <div id="cursor-ball"></div>
-    <div id="cursor-text">VIEW</div>
 
     <!-- NAVIGATION -->
     <nav class="fixed z-50 flex justify-between items-center py-6 px-6 md:py-8 md:px-8 border border-transparent transition-all duration-300">
@@ -405,7 +379,7 @@
         </header>
 
         <!-- PROBLEM SECTION -->
-        <section id="problem" class="py-20 md:py-32 px-6 md:px-20 max-w-7xl mx-auto overflow-x-hidden">
+        <section id="problem" class="py-20 md:py-32 px-6 md:px-20 max-w-7xl mx-auto md:overflow-x-hidden">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
                 <div class="lg:col-span-4 static lg:sticky lg:top-32 overflow-visible">
                     <span class="text-brand font-bold uppercase tracking-widest text-xs mb-4 block">The Reality</span>
@@ -1425,38 +1399,51 @@
         // 5. MUSEUM SCROLL (Universal)
         const museumSection = document.getElementById('museum');
         const horizontalWrapper = document.querySelector('.horizontal-wrapper');
-        // Slower scroll on mobile (scrub: 4) vs desktop (scrub: 1)
         const isMobile = window.innerWidth < 768;
         const horizontalDistance = horizontalWrapper.scrollWidth - window.innerWidth;
-        const scrollMultiplier = isMobile ? 2.5 : 1;
-        // Less padding for first slide, more for last slide
-        const firstSlidePadding = window.innerHeight * (isMobile ? 0.3 : 0.2);
-        const lastSlidePadding = window.innerHeight * (isMobile ? 1.2 : 0.8);
-        const baseScrollDistance = horizontalDistance * scrollMultiplier;
-        const totalScrollDistance = baseScrollDistance + firstSlidePadding + lastSlidePadding;
         
-        // Use timeline to hold first and last slides longer
-        const museumTL = gsap.timeline({
-            scrollTrigger: {
-                trigger: "#museum",
-                pin: true,
-                scrub: isMobile ? 4 : 1,
-                start: "top top",
-                end: () => "+=" + totalScrollDistance,
-                invalidateOnRefresh: true
-            }
-        });
-        
-        // Hold first slide (less time), animate through middle, hold last slide (more time)
-        const firstPaddingRatio = firstSlidePadding / totalScrollDistance;
-        const lastPaddingRatio = lastSlidePadding / totalScrollDistance;
-        const middleRatio = baseScrollDistance / totalScrollDistance;
-        
-        museumTL
-            .set(horizontalWrapper, { x: 0 })
-            .to(horizontalWrapper, { x: 0, duration: firstPaddingRatio, ease: "none" })
-            .to(horizontalWrapper, { x: -horizontalDistance, duration: middleRatio, ease: "none" })
-            .to(horizontalWrapper, { x: -horizontalDistance, duration: lastPaddingRatio, ease: "none" });
+        if (isMobile) {
+            // Mobile: Slower scroll with padding for first/last slides
+            const scrollMultiplier = 2.5;
+            const firstSlidePadding = window.innerHeight * 0.3;
+            const lastSlidePadding = window.innerHeight * 1.2;
+            const baseScrollDistance = horizontalDistance * scrollMultiplier;
+            const totalScrollDistance = baseScrollDistance + firstSlidePadding + lastSlidePadding;
+            
+            const museumTL = gsap.timeline({
+                scrollTrigger: {
+                    trigger: "#museum",
+                    pin: true,
+                    scrub: 4,
+                    start: "top top",
+                    end: () => "+=" + totalScrollDistance,
+                    invalidateOnRefresh: true
+                }
+            });
+            
+            const firstPaddingRatio = firstSlidePadding / totalScrollDistance;
+            const lastPaddingRatio = lastSlidePadding / totalScrollDistance;
+            const middleRatio = baseScrollDistance / totalScrollDistance;
+            
+            museumTL
+                .set(horizontalWrapper, { x: 0 })
+                .to(horizontalWrapper, { x: 0, duration: firstPaddingRatio, ease: "none" })
+                .to(horizontalWrapper, { x: -horizontalDistance, duration: middleRatio, ease: "none" })
+                .to(horizontalWrapper, { x: -horizontalDistance, duration: lastPaddingRatio, ease: "none" });
+        } else {
+            // Desktop: Original simple implementation
+            gsap.to(horizontalWrapper, {
+                x: () => -(horizontalWrapper.scrollWidth - window.innerWidth),
+                ease: "none",
+                scrollTrigger: {
+                    trigger: "#museum",
+                    pin: true,
+                    scrub: 1,
+                    end: () => "+=" + (horizontalWrapper.scrollWidth - window.innerWidth),
+                    invalidateOnRefresh: true
+                }
+            });
+        }
 
         // 6. HIGHLIGHTER
         gsap.utils.toArray('.highlight-text').forEach(h => {
@@ -1501,24 +1488,7 @@
             });
         });
 
-        // 9. CUSTOM CURSOR (Desktop only)
-        if (window.innerWidth > 767) {
-            const cursorBall = document.getElementById('cursor-ball');
-            const cursorText = document.getElementById('cursor-text');
-            window.addEventListener('mousemove', (e) => {
-                gsap.to(cursorBall, { x: e.clientX, y: e.clientY, duration: 0.1 });
-                gsap.to(cursorText, { x: e.clientX, y: e.clientY, duration: 0.15 });
-            });
-            document.querySelectorAll('.hover-trigger').forEach(el => {
-                el.addEventListener('mouseenter', () => {
-                    document.body.classList.add('hovering');
-                    cursorText.innerText = el.getAttribute('data-cursor') || 'VIEW';
-                });
-                el.addEventListener('mouseleave', () => document.body.classList.remove('hovering'));
-            });
-        }
-
-        // 10. THEATRICAL FOOTER REVEAL
+        // 9. THEATRICAL FOOTER REVEAL
         function initFooterReveal() {
             const footer = document.getElementById('site-footer');
             const mainContent = document.getElementById('main-content');
