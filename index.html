@@ -1427,17 +1427,34 @@
         const horizontalWrapper = document.querySelector('.horizontal-wrapper');
         // Slower scroll on mobile (scrub: 4) vs desktop (scrub: 1)
         const isMobile = window.innerWidth < 768;
-        gsap.to(horizontalWrapper, {
-            x: () => -(horizontalWrapper.scrollWidth - window.innerWidth),
-            ease: "none",
+        const horizontalDistance = horizontalWrapper.scrollWidth - window.innerWidth;
+        const scrollMultiplier = isMobile ? 2.5 : 1;
+        // Add extra padding for first and last slides (viewport height for each)
+        const slidePadding = window.innerHeight * (isMobile ? 1.2 : 0.8);
+        const baseScrollDistance = horizontalDistance * scrollMultiplier;
+        const totalScrollDistance = baseScrollDistance + (slidePadding * 2);
+        
+        // Use timeline to hold first and last slides longer
+        const museumTL = gsap.timeline({
             scrollTrigger: {
                 trigger: "#museum",
                 pin: true,
                 scrub: isMobile ? 4 : 1,
-                end: () => "+=" + (horizontalWrapper.scrollWidth - window.innerWidth),
+                start: "top top",
+                end: () => "+=" + totalScrollDistance,
                 invalidateOnRefresh: true
             }
         });
+        
+        // Hold first slide, animate through middle, hold last slide
+        const paddingRatio = slidePadding / totalScrollDistance;
+        const middleRatio = baseScrollDistance / totalScrollDistance;
+        
+        museumTL
+            .set(horizontalWrapper, { x: 0 })
+            .to(horizontalWrapper, { x: 0, duration: paddingRatio, ease: "none" })
+            .to(horizontalWrapper, { x: -horizontalDistance, duration: middleRatio, ease: "none" })
+            .to(horizontalWrapper, { x: -horizontalDistance, duration: paddingRatio, ease: "none" });
 
         // 6. HIGHLIGHTER
         gsap.utils.toArray('.highlight-text').forEach(h => {
