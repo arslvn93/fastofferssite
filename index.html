@@ -1390,6 +1390,9 @@
         }
 
         gsap.registerPlugin(ScrollTrigger);
+        
+        // Prevent layout jumps on mobile address bar resize
+        ScrollTrigger.config({ ignoreMobileResize: true });
 
         // Scroll Trigger for Bento Cards (REMOVED)
 
@@ -1444,18 +1447,39 @@
             }
         });
 
-        // 5. MUSEUM SCROLL (Universal)
+        // 5. MUSEUM SCROLL (Universal -> Desktop Only for Stability)
         const museumSection = document.getElementById('museum');
         const horizontalWrapper = document.querySelector('.horizontal-wrapper');
-        gsap.to(horizontalWrapper, {
-            x: () => -(horizontalWrapper.scrollWidth - window.innerWidth),
-            ease: "none",
-            scrollTrigger: {
-                trigger: "#museum",
-                pin: true,
-                scrub: 1,
-                end: () => "+=" + (horizontalWrapper.scrollWidth - window.innerWidth),
-                invalidateOnRefresh: true
+        
+        // On Desktop: Pin and horizontal scroll
+        ScrollTrigger.matchMedia({
+            "(min-width: 768px)": function() {
+                gsap.to(horizontalWrapper, {
+                    x: () => -(horizontalWrapper.scrollWidth - window.innerWidth),
+                    ease: "none",
+                    scrollTrigger: {
+                        trigger: "#museum",
+                        pin: true,
+                        scrub: 1,
+                        end: () => "+=" + (horizontalWrapper.scrollWidth - window.innerWidth),
+                        invalidateOnRefresh: true
+                    }
+                });
+            },
+            // On Mobile: Allow native horizontal scroll (disable pinning)
+            "(max-width: 767px)": function() {
+                // Ensure wrapper is scrollable
+                if(horizontalWrapper) {
+                    horizontalWrapper.style.overflowX = "auto";
+                    horizontalWrapper.style.display = "flex";
+                    // Reset transform if switching from desktop
+                    gsap.set(horizontalWrapper, { x: 0 });
+                }
+                // We might need to adjust parent container style to allow scrolling
+                if(museumSection) {
+                    museumSection.style.height = "auto";
+                    museumSection.style.overflowX = "auto"; 
+                }
             }
         });
 
@@ -1489,17 +1513,21 @@
         });
 
         // 8. PARALLAX CARDS
-        gsap.utils.toArray('.parallax-card').forEach(card => {
-            const speed = parseFloat(card.getAttribute('data-speed'));
-            gsap.to(card, {
-                y: () => (100 * speed) + "%",
-                scrollTrigger: {
-                    trigger: "header",
-                    start: "top top",
-                    end: "bottom top",
-                    scrub: true
-                }
-            });
+        ScrollTrigger.matchMedia({
+            "(min-width: 768px)": function() {
+                gsap.utils.toArray('.parallax-card').forEach(card => {
+                    const speed = parseFloat(card.getAttribute('data-speed'));
+                    gsap.to(card, {
+                        y: () => (100 * speed) + "%",
+                        scrollTrigger: {
+                            trigger: "header",
+                            start: "top top",
+                            end: "bottom top",
+                            scrub: true
+                        }
+                    });
+                });
+            }
         });
 
         // 9. CUSTOM CURSOR (Desktop only)
