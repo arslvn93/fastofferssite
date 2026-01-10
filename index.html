@@ -1373,16 +1373,22 @@
 
     <script>
         // 1. LENIS
-        const lenis = new Lenis({
-            duration: 1.2,
-            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-            smooth: true
-        });
-        function raf(time) {
-            lenis.raf(time);
+        // Disable Lenis on mobile to prevent scroll stuttering with sticky elements
+        const isMobile = window.innerWidth < 768 || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+        
+        if (!isMobile) {
+            const lenis = new Lenis({
+                duration: 1.2,
+                easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+                smooth: true
+            });
+            function raf(time) {
+                lenis.raf(time);
+                requestAnimationFrame(raf);
+            }
             requestAnimationFrame(raf);
         }
-        requestAnimationFrame(raf);
+
         gsap.registerPlugin(ScrollTrigger);
 
         // Scroll Trigger for Bento Cards (REMOVED)
@@ -1542,27 +1548,28 @@
                     const p = self.progress;
                     
                     if (p <= 0) {
-                        // CRITICAL FIX: Restore overflow: visible so sticky elements work when scrolling back up
-                        gsap.set(mainContent, { clearProps: "transform,filter,borderRadius,boxShadow,overflow" });
-                        mainContent.style.overflow = "visible"; // Explicit safety
+                        // Reset properties
+                        gsap.set(mainContent, { clearProps: "transform,filter,clipPath,boxShadow" });
                     } else {
                         const scale = 1 - (p * 0.05);
                         
                         // Check for mobile
                         const isMobile = window.innerWidth < 768;
                         
-                        // Radius: 50px on mobile, 20px on desktop
+                        // Radius: 60px on mobile, 100px on desktop
                         const maxRadius = isMobile ? 60 : 100;
                         const radius = p * maxRadius; 
                         
                         // Shadow opacity: Subtle on mobile (0.2), Strong on desktop (0.6)
                         const baseOpacity = isMobile ? 0.2 : 0.6;
                         const dynamicOpacity = isMobile ? 0.2 : 0.4;
+
+                        // Use clip-path instead of overflow: hidden to avoid scroll jumping
+                        const clipPath = `inset(0 0 0 0 round 0 0 ${radius}px ${radius}px)`;
                         
                         gsap.set(mainContent, { 
                             scale: scale,
-                            borderRadius: `0 0 ${radius}px ${radius}px`,
-                            overflow: "hidden", 
+                            clipPath: clipPath,
                             transformOrigin: "center bottom",
                             boxShadow: `0 80px 100px -40px rgba(0,0,0,${baseOpacity + p*dynamicOpacity})`
                         });
@@ -1575,8 +1582,7 @@
                 },
                 onLeaveBack: () => {
                     // Force clear on leaving back to be safe
-                    gsap.set(mainContent, { clearProps: "transform,filter,borderRadius,boxShadow,overflow" });
-                    mainContent.style.overflow = "visible";
+                    gsap.set(mainContent, { clearProps: "transform,filter,clipPath,boxShadow" });
                 }
             });
             
@@ -1584,8 +1590,7 @@
             gsap.set(footer, { opacity: 1, scale: 0.95 });
             
             // Clean up any potential lingering transforms, BUT PRESERVE MARGIN-BOTTOM
-            // 'clearProps: all' was removing the margin-bottom needed for the scroll!
-            gsap.set(mainContent, { clearProps: "transform,filter,borderRadius,boxShadow,overflow" });
+            gsap.set(mainContent, { clearProps: "transform,filter,clipPath,boxShadow" });
         }
 
         // Initialize after a slight delay
