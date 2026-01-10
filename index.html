@@ -409,9 +409,9 @@
         </header>
 
         <!-- PROBLEM SECTION -->
-        <section id="problem" class="py-20 md:py-32 px-6 md:px-20 max-w-7xl mx-auto">
+        <section id="problem" class="py-20 md:py-32 px-6 md:px-20 max-w-7xl mx-auto overflow-x-hidden">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
-                <div class="lg:col-span-4 lg:sticky lg:top-32">
+                <div class="lg:col-span-4 static lg:sticky lg:top-32 overflow-visible">
                     <span class="text-brand font-bold uppercase tracking-widest text-xs mb-4 block">The Reality</span>
                     <h2 class="font-serif text-4xl md:text-5xl leading-tight mb-4 text-ink">Your time is worth <br><span class="italic text-brand">$1000/hr.</span></h2>
                     <p class="text-ink-light text-base md:text-lg leading-relaxed">Stop wasting it on administrative friction. The old way of paperwork is costing you deals.</p>
@@ -451,8 +451,8 @@
                 <!-- MOBILE: STACKED CARDS WITH FULL UI -->
                 <div class="md:hidden relative pb-4">
                     
-                    <!-- Step 1 Mobile -->
-                    <div class="md:sticky md:top-24 mb-8 bg-white rounded-3xl p-5 text-ink shadow-2xl border border-gray-200 z-10">
+                    <!-- Step 1 Mobile (Sticky) -->
+                    <div class="sticky top-24 mb-8 bg-white rounded-3xl p-5 text-ink shadow-2xl border border-gray-200 z-10">
                         <div class="mb-6 border-b border-gray-100 pb-4">
                             <span class="text-brand font-bold text-3xl font-serif block mb-2">01</span>
                             <h3 class="text-2xl font-bold">Fill in the Blanks.</h3>
@@ -480,7 +480,7 @@
                     </div>
 
                     <!-- Step 2 Mobile -->
-                    <div class="md:sticky md:top-32 mb-8 bg-white rounded-3xl p-5 text-ink shadow-2xl border border-gray-200 z-20">
+                    <div class="sticky top-32 mb-8 bg-white rounded-3xl p-5 text-ink shadow-2xl border border-gray-200 z-20">
                         <div class="mb-6 border-b border-gray-100 pb-4">
                             <span class="text-brand font-bold text-3xl font-serif block mb-2">02</span>
                             <h3 class="text-2xl font-bold">Download the Offer.</h3>
@@ -506,7 +506,7 @@
                     </div>
 
                     <!-- Step 3 Mobile -->
-                    <div class="md:sticky md:top-40 mb-8 bg-white rounded-3xl p-5 text-ink shadow-2xl border border-gray-200 z-30">
+                    <div class="sticky top-40 mb-8 bg-white rounded-3xl p-5 text-ink shadow-2xl border border-gray-200 z-30">
                         <div class="mb-6 border-b border-gray-100 pb-4">
                             <span class="text-brand font-bold text-3xl font-serif block mb-2">03</span>
                             <h3 class="text-2xl font-bold">Send for Signatures.</h3>
@@ -1373,26 +1373,17 @@
 
     <script>
         // 1. LENIS
-        // Disable Lenis on mobile to prevent scroll stuttering with sticky elements
-        const isMobile = window.innerWidth < 768 || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-        
-        if (!isMobile) {
-            const lenis = new Lenis({
-                duration: 1.2,
-                easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-                smooth: true
-            });
-            function raf(time) {
-                lenis.raf(time);
-                requestAnimationFrame(raf);
-            }
+        const lenis = new Lenis({
+            duration: 1.2,
+            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+            smooth: true
+        });
+        function raf(time) {
+            lenis.raf(time);
             requestAnimationFrame(raf);
         }
-
+        requestAnimationFrame(raf);
         gsap.registerPlugin(ScrollTrigger);
-        
-        // Prevent layout jumps on mobile address bar resize
-        ScrollTrigger.config({ ignoreMobileResize: true });
 
         // Scroll Trigger for Bento Cards (REMOVED)
 
@@ -1447,39 +1438,18 @@
             }
         });
 
-        // 5. MUSEUM SCROLL (Universal -> Desktop Only for Stability)
+        // 5. MUSEUM SCROLL (Universal)
         const museumSection = document.getElementById('museum');
         const horizontalWrapper = document.querySelector('.horizontal-wrapper');
-        
-        // On Desktop: Pin and horizontal scroll
-        ScrollTrigger.matchMedia({
-            "(min-width: 768px)": function() {
-                gsap.to(horizontalWrapper, {
-                    x: () => -(horizontalWrapper.scrollWidth - window.innerWidth),
-                    ease: "none",
-                    scrollTrigger: {
-                        trigger: "#museum",
-                        pin: true,
-                        scrub: 1,
-                        end: () => "+=" + (horizontalWrapper.scrollWidth - window.innerWidth),
-                        invalidateOnRefresh: true
-                    }
-                });
-            },
-            // On Mobile: Allow native horizontal scroll (disable pinning)
-            "(max-width: 767px)": function() {
-                // Ensure wrapper is scrollable
-                if(horizontalWrapper) {
-                    horizontalWrapper.style.overflowX = "auto";
-                    horizontalWrapper.style.display = "flex";
-                    // Reset transform if switching from desktop
-                    gsap.set(horizontalWrapper, { x: 0 });
-                }
-                // We might need to adjust parent container style to allow scrolling
-                if(museumSection) {
-                    museumSection.style.height = "auto";
-                    museumSection.style.overflowX = "auto"; 
-                }
+        gsap.to(horizontalWrapper, {
+            x: () => -(horizontalWrapper.scrollWidth - window.innerWidth),
+            ease: "none",
+            scrollTrigger: {
+                trigger: "#museum",
+                pin: true,
+                scrub: 1,
+                end: () => "+=" + (horizontalWrapper.scrollWidth - window.innerWidth),
+                invalidateOnRefresh: true
             }
         });
 
@@ -1513,21 +1483,17 @@
         });
 
         // 8. PARALLAX CARDS
-        ScrollTrigger.matchMedia({
-            "(min-width: 768px)": function() {
-                gsap.utils.toArray('.parallax-card').forEach(card => {
-                    const speed = parseFloat(card.getAttribute('data-speed'));
-                    gsap.to(card, {
-                        y: () => (100 * speed) + "%",
-                        scrollTrigger: {
-                            trigger: "header",
-                            start: "top top",
-                            end: "bottom top",
-                            scrub: true
-                        }
-                    });
-                });
-            }
+        gsap.utils.toArray('.parallax-card').forEach(card => {
+            const speed = parseFloat(card.getAttribute('data-speed'));
+            gsap.to(card, {
+                y: () => (100 * speed) + "%",
+                scrollTrigger: {
+                    trigger: "header",
+                    start: "top top",
+                    end: "bottom top",
+                    scrub: true
+                }
+            });
         });
 
         // 9. CUSTOM CURSOR (Desktop only)
@@ -1576,28 +1542,27 @@
                     const p = self.progress;
                     
                     if (p <= 0) {
-                        // Reset properties
-                        gsap.set(mainContent, { clearProps: "transform,filter,clipPath,boxShadow" });
+                        // CRITICAL FIX: Restore overflow: visible so sticky elements work when scrolling back up
+                        gsap.set(mainContent, { clearProps: "transform,filter,borderRadius,boxShadow,overflow" });
+                        mainContent.style.overflow = "visible"; // Explicit safety
                     } else {
                         const scale = 1 - (p * 0.05);
                         
                         // Check for mobile
                         const isMobile = window.innerWidth < 768;
                         
-                        // Radius: 60px on mobile, 100px on desktop
+                        // Radius: 50px on mobile, 20px on desktop
                         const maxRadius = isMobile ? 60 : 100;
                         const radius = p * maxRadius; 
                         
                         // Shadow opacity: Subtle on mobile (0.2), Strong on desktop (0.6)
                         const baseOpacity = isMobile ? 0.2 : 0.6;
                         const dynamicOpacity = isMobile ? 0.2 : 0.4;
-
-                        // Use clip-path instead of overflow: hidden to avoid scroll jumping
-                        const clipPath = `inset(0 0 0 0 round 0 0 ${radius}px ${radius}px)`;
                         
                         gsap.set(mainContent, { 
                             scale: scale,
-                            clipPath: clipPath,
+                            borderRadius: `0 0 ${radius}px ${radius}px`,
+                            overflow: "hidden", 
                             transformOrigin: "center bottom",
                             boxShadow: `0 80px 100px -40px rgba(0,0,0,${baseOpacity + p*dynamicOpacity})`
                         });
@@ -1610,7 +1575,8 @@
                 },
                 onLeaveBack: () => {
                     // Force clear on leaving back to be safe
-                    gsap.set(mainContent, { clearProps: "transform,filter,clipPath,boxShadow" });
+                    gsap.set(mainContent, { clearProps: "transform,filter,borderRadius,boxShadow,overflow" });
+                    mainContent.style.overflow = "visible";
                 }
             });
             
@@ -1618,7 +1584,8 @@
             gsap.set(footer, { opacity: 1, scale: 0.95 });
             
             // Clean up any potential lingering transforms, BUT PRESERVE MARGIN-BOTTOM
-            gsap.set(mainContent, { clearProps: "transform,filter,clipPath,boxShadow" });
+            // 'clearProps: all' was removing the margin-bottom needed for the scroll!
+            gsap.set(mainContent, { clearProps: "transform,filter,borderRadius,boxShadow,overflow" });
         }
 
         // Initialize after a slight delay
