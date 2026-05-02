@@ -261,7 +261,7 @@ export default function Features() {
             </h3>
             <p className="text-ink-light text-base md:text-lg leading-relaxed">
               No steep learning curve. If you can send an email, you can use Fast Offers. Our logic
-              engine handles the complexity so you don't have to.
+              engine handles the complexity so you don&apos;t have to.
             </p>
           </div>
 

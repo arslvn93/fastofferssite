@@ -63,22 +63,24 @@ export default function ScrollAnimations() {
 
       // Maglev cards 3D effect
       const cards = document.querySelectorAll('.maglev-card')
-      cards.forEach((card) => {
-        const handleMouseMove = (e: MouseEvent) => {
-          const rect = (card as HTMLElement).getBoundingClientRect()
-          const x = e.clientX - rect.left
-          const y = e.clientY - rect.top
+      cards.forEach((node) => {
+        const card = node as HTMLElement
+        const handleMouseMove: EventListener = (e) => {
+          const me = e as MouseEvent
+          const rect = card.getBoundingClientRect()
+          const x = me.clientX - rect.left
+          const y = me.clientY - rect.top
           const centerX = rect.width / 2
           const centerY = rect.height / 2
           const rotateX = ((y - centerY) / centerY) * -3
           const rotateY = ((x - centerX) / centerX) * 3
-          ;(card as HTMLElement).style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`
-          ;(card as HTMLElement).style.boxShadow = `${-rotateY * 2}px ${rotateX * 2}px 30px rgba(0,0,0,0.05)`
+          card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`
+          card.style.boxShadow = `${-rotateY * 2}px ${rotateX * 2}px 30px rgba(0,0,0,0.05)`
         }
 
-        const handleMouseLeave = () => {
-          ;(card as HTMLElement).style.transform = `rotateX(0) rotateY(0) scale(1)`
-          ;(card as HTMLElement).style.boxShadow = `0 20px 40px rgba(0,0,0,0.03)`
+        const handleMouseLeave: EventListener = () => {
+          card.style.transform = `rotateX(0) rotateY(0) scale(1)`
+          card.style.boxShadow = `0 20px 40px rgba(0,0,0,0.03)`
         }
 
         card.addEventListener('mousemove', handleMouseMove)
@@ -130,7 +132,7 @@ export default function ScrollAnimations() {
           },
         })
 
-        museumScrollTrigger = museumTL.scrollTrigger
+        museumScrollTrigger = museumTL.scrollTrigger ?? null
 
         // Calculate ratios for timeline segments
         const firstPaddingRatio = firstSlidePadding / totalScrollDistance

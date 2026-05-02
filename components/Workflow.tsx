@@ -215,7 +215,7 @@ export default function Workflow() {
               <span className="text-brand font-bold text-3xl font-serif block mb-2">02</span>
               <h3 className="text-2xl font-bold">Download the Offer.</h3>
               <p className="text-base text-gray-500 mt-1">
-                Within 5 seconds, you'll have a fully built offer in an editable PDF, ready to
+                Within 5 seconds, you&apos;ll have a fully built offer in an editable PDF, ready to
                 review.
               </p>
             </div>
@@ -727,7 +727,7 @@ export default function Workflow() {
               <span className="text-brand-light text-6xl font-serif block mb-4">02</span>
               <h3 className="text-4xl font-bold mb-4">Download the Offer.</h3>
               <p className="text-xl text-gray-400">
-                Within 5 seconds, you'll have a fully built offer in an editable PDF, ready to
+                Within 5 seconds, you&apos;ll have a fully built offer in an editable PDF, ready to
                 review.
               </p>
             </div>

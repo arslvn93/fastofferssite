@@ -31,7 +31,7 @@ export default function Problem() {
             <div className="border-l-2 border-gray-200 pl-6 hover:border-brand transition-colors duration-500">
               <h3 className="font-bold text-xl md:text-2xl mb-2 text-ink">Eliminate Errors</h3>
               <p className="text-ink-light text-sm md:text-base leading-relaxed">
-                No more missing clauses. Our logic engine knows if it's a Condo or Freehold and
+                No more missing clauses. Our logic engine knows if it&apos;s a Condo or Freehold and
                 adapts automatically.
               </p>
             </div>
